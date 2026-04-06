@@ -56,7 +56,7 @@ h1, h2, h3, h4 {
 
 /* Print styles */
 @media print {
-  header, footer, .print\\:hidden, nav[aria-label="Breadcrumb"] {
+  header, footer, [data-print-hidden], nav[aria-label="Breadcrumb"] {
     display: none !important;
   }
   body {
