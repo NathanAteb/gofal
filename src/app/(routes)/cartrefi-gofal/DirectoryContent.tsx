@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useI18n } from "@/lib/i18n/context";
 import { SearchBar } from "@/components/forms/SearchBar";
@@ -11,15 +11,24 @@ import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { counties } from "@/lib/utils/counties";
 import type { CareHomeWithProfile, SearchFilters } from "@/types/database";
 
-export function DirectoryContent() {
+interface DirectoryContentProps {
+  initialHomes?: CareHomeWithProfile[];
+  initialTotal?: number;
+}
+
+export function DirectoryContent({
+  initialHomes = [],
+  initialTotal = 0,
+}: DirectoryContentProps) {
   const { locale, t } = useI18n();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const isFirstRender = useRef(true);
 
-  const [homes, setHomes] = useState<CareHomeWithProfile[]>([]);
-  const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [homes, setHomes] = useState<CareHomeWithProfile[]>(initialHomes as CareHomeWithProfile[]);
+  const [total, setTotal] = useState(initialTotal);
+  const [totalPages, setTotalPages] = useState(Math.ceil(initialTotal / 12));
+  const [loading, setLoading] = useState(false);
 
   const filtersFromUrl: SearchFilters = {
     query: searchParams.get("q") || undefined,
@@ -33,6 +42,12 @@ export function DirectoryContent() {
   };
 
   const [filters, setFilters] = useState<SearchFilters>(filtersFromUrl);
+
+  const hasActiveFilters = !!(
+    filters.query || filters.county || filters.care_type ||
+    filters.active_offer_level || filters.sort ||
+    (filters.page && filters.page > 1)
+  );
 
   const fetchHomes = useCallback(async (f: SearchFilters) => {
     setLoading(true);
@@ -59,6 +74,12 @@ export function DirectoryContent() {
   }, []);
 
   useEffect(() => {
+    // Skip first render if we have server data and no URL filters
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      if (initialHomes.length > 0 && !hasActiveFilters) return;
+    }
+
     fetchHomes(filters);
 
     const params = new URLSearchParams();
@@ -71,7 +92,7 @@ export function DirectoryContent() {
 
     const qs = params.toString();
     router.replace(`/cartrefi-gofal${qs ? `?${qs}` : ""}`, { scroll: false });
-  }, [filters, fetchHomes, router]);
+  }, [filters, fetchHomes, router, initialHomes.length, hasActiveFilters]);
 
   const currentPage = filters.page || 1;
 
