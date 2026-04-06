@@ -230,7 +230,7 @@ export function CareHomeProfile({ home, related }: Props) {
             )}
 
             {/* Print & Share */}
-            <div className="mt-8 flex gap-3" data-print-hidden
+            <div className="mt-8 flex gap-3" data-print-hidden>
               <button
                 onClick={() => window.print()}
                 className="inline-flex items-center gap-2 rounded-full border border-blush-grey bg-white px-4 py-2 text-sm font-semibold text-muted-plum transition-colors hover:bg-ivory"
