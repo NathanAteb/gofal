@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useI18n } from "@/lib/i18n/context";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { formatDate } from "@/lib/utils/format";
+import { guides } from "@/content/guides";
 import type { Guide } from "@/content/guides";
 
 interface Props {
@@ -103,7 +104,30 @@ export function GuideContent({ guide }: Props) {
           })}
         </div>
 
-        <div className="mt-12 rounded-[16px] bg-secondary p-8 text-center text-white">
+        {/* Related guides */}
+        <div className="mt-10">
+          <h2 className="font-heading text-xl font-bold">
+            {locale === "cy" ? "Canllawiau eraill" : "Other guides"}
+          </h2>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {guides
+              .filter((g) => g.slug !== guide.slug)
+              .slice(0, 4)
+              .map((g) => (
+                <Link
+                  key={g.slug}
+                  href={`/canllawiau/${g.slug}`}
+                  className="rounded-[12px] border border-blush-grey bg-white p-4 transition-all hover:shadow-card hover:border-primary"
+                >
+                  <p className="font-heading text-sm font-bold text-dusk hover:text-primary">
+                    {locale === "cy" ? g.title_cy : g.title_en}
+                  </p>
+                </Link>
+              ))}
+          </div>
+        </div>
+
+        <div className="mt-10 rounded-[16px] bg-secondary p-8 text-center text-white">
           <h2 className="font-heading text-2xl font-bold">
             {locale === "cy"
               ? "Barod i ddechrau chwilio?"

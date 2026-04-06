@@ -8,10 +8,11 @@ import { FilterPanel } from "@/components/forms/FilterPanel";
 import { CareHomeCard } from "@/components/cards/CareHomeCard";
 import { SkeletonGrid } from "@/components/ui/SkeletonCard";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
+import { counties } from "@/lib/utils/counties";
 import type { CareHomeWithProfile, SearchFilters } from "@/types/database";
 
 export function DirectoryContent() {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -114,7 +115,32 @@ export function DirectoryContent() {
         </div>
       ) : (
         <div className="mt-12 text-center">
-          <p className="text-lg text-muted-plum">{t("directory.no_results")}</p>
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-linen text-muted-plum mb-4">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
+            </svg>
+          </div>
+          <p className="text-lg font-semibold text-dusk">{t("directory.no_results")}</p>
+          <p className="mt-2 text-sm text-muted-plum max-w-md mx-auto">
+            {locale === "cy"
+              ? "Ceisiwch chwilio am dref, sir, neu god post gwahanol. Gallwch hefyd bori yn ôl sir isod."
+              : "Try searching for a different town, county, or postcode. You can also browse by county below."}
+          </p>
+          <div className="mt-6 flex flex-wrap justify-center gap-2">
+            {["sir-gaerfyrddin", "gwynedd", "caerdydd", "abertawe", "ceredigion"].map((slug) => {
+              const c = counties.find((co) => co.slug === slug);
+              if (!c) return null;
+              return (
+                <button
+                  key={slug}
+                  onClick={() => setFilters({ county: slug, page: 1 })}
+                  className="rounded-full border border-blush-grey bg-white px-3 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-white"
+                >
+                  {locale === "cy" ? c.name_cy : c.name_en}
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
 

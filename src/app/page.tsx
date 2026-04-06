@@ -1,12 +1,34 @@
 "use client";
 
 import Link from "next/link";
+import { useState, useEffect } from "react";
 import { useI18n } from "@/lib/i18n/context";
 import { SearchBar } from "@/components/forms/SearchBar";
 import { counties } from "@/lib/utils/counties";
 
 export default function HomePage() {
   const { locale, t } = useI18n();
+  const [countyCounts, setCountyCounts] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    fetch("/api/search?per_page=1")
+      .then((r) => r.json())
+      .then((data) => {
+        // Fetch counts per county from all homes
+        const counts: Record<string, number> = {};
+        counties.forEach((c) => {
+          fetch(`/api/search?county=${c.slug}&per_page=1`)
+            .then((r) => r.json())
+            .then((d) => {
+              if (d.total > 0) {
+                setCountyCounts((prev) => ({ ...prev, [c.slug]: d.total }));
+              }
+            })
+            .catch(() => {});
+        });
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <>
@@ -152,6 +174,11 @@ export default function HomePage() {
                 <p className="font-heading font-bold text-dusk group-hover:text-primary transition-colors">
                   {locale === "cy" ? county.name_cy : county.name_en}
                 </p>
+                {countyCounts[county.slug] > 0 && (
+                  <p className="mt-1 text-xs text-muted-plum">
+                    {countyCounts[county.slug]} {locale === "cy" ? "cartref gofal" : "care homes"}
+                  </p>
+                )}
               </Link>
             ))}
           </div>

@@ -5,7 +5,7 @@ import { useI18n } from "@/lib/i18n/context";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 
 export default function ProvidersPage() {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
 
   const benefits = [
     { title: t("providers.benefit1_title"), desc: t("providers.benefit1_desc"), icon: "gift" },
@@ -57,8 +57,43 @@ export default function ProvidersPage() {
         </p>
       </div>
 
+      {/* Feature comparison */}
+      <div className="mt-12 overflow-hidden rounded-[16px] border border-blush-grey">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="bg-linen">
+              <th className="p-4 text-left font-heading font-bold text-dusk">{locale === "cy" ? "Nodwedd" : "Feature"}</th>
+              <th className="p-4 text-center font-heading font-bold text-dusk">{locale === "cy" ? "Am Ddim" : "Free"}</th>
+              <th className="p-4 text-center font-heading font-bold text-accent">{locale === "cy" ? "Uwch £29/mis" : "Enhanced £29/mo"}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              { feature_cy: "Gwybodaeth CIW sylfaenol", feature_en: "Basic CIW information", free: true, enhanced: true },
+              { feature_cy: "Ymholiadau gan deuluoedd", feature_en: "Enquiries from families", free: true, enhanced: true },
+              { feature_cy: "Disgrifiad dwyieithog", feature_en: "Bilingual description", free: false, enhanced: true },
+              { feature_cy: "Hyd at 10 llun", feature_en: "Up to 10 photos", free: false, enhanced: true },
+              { feature_cy: "Dangos ffioedd wythnosol", feature_en: "Display weekly fees", free: false, enhanced: true },
+              { feature_cy: "Blaenoriaeth mewn canlyniadau", feature_en: "Priority in search results", free: false, enhanced: true },
+              { feature_cy: "Bathodyn 'Uwch'", feature_en: "'Enhanced' badge", free: false, enhanced: true },
+            ].map((row, i) => (
+              <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-ivory"}>
+                <td className="p-4 text-muted-plum">{locale === "cy" ? row.feature_cy : row.feature_en}</td>
+                <td className="p-4 text-center">{row.free ? "✓" : "—"}</td>
+                <td className="p-4 text-center font-semibold text-primary">{row.enhanced ? "✓" : "—"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
       {/* CTA */}
       <div className="mt-12 text-center">
+        <p className="text-sm text-muted-plum mb-4">
+          {locale === "cy"
+            ? "Chwiliwch am eich cartref gofal a hawliwch eich rhestriad"
+            : "Search for your care home and claim your listing"}
+        </p>
         <Link
           href="/cartrefi-gofal"
           className="inline-block rounded-full bg-secondary px-8 py-4 text-lg font-body font-bold text-white transition-colors hover:bg-secondary/90"

@@ -5,7 +5,7 @@ import { useI18n } from "@/lib/i18n/context";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 
 export default function ContactPage() {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   const [status, setStatus] = useState<"idle" | "sending" | "success">("idle");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -36,6 +36,18 @@ export default function ContactPage() {
         {t("contact.title")}
       </h1>
       <p className="mt-2 text-muted-plum">{t("contact.subtitle")}</p>
+
+      <div className="mt-4 rounded-[12px] bg-linen p-4 text-sm text-muted-plum">
+        <p>
+          <strong>E-bost / Email:</strong>{" "}
+          <a href="mailto:hello@gofal.wales" className="text-primary hover:underline">hello@gofal.wales</a>
+        </p>
+        <p className="mt-1">
+          {locale === "cy"
+            ? "Byddwn yn ymateb o fewn 24 awr."
+            : "We'll respond within 24 hours."}
+        </p>
+      </div>
 
       {status === "success" ? (
         <div className="mt-8 rounded-[16px] border border-blush-grey bg-white p-8 text-center">
