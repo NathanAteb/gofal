@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useI18n } from "@/lib/i18n/context";
 import { SearchBar } from "@/components/forms/SearchBar";
+import { WalesMap } from "@/components/maps/WalesMap";
 import { counties } from "@/lib/utils/counties";
 
 export default function HomePage() {
@@ -156,7 +157,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Browse by County */}
+      {/* Browse by County — Interactive Map */}
       <section className="bg-linen py-16 sm:py-24">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <h2 className="text-center font-heading text-3xl font-bold sm:text-4xl">
@@ -164,20 +165,28 @@ export default function HomePage() {
               ? "Porwch yn ôl sir"
               : "Browse by county"}
           </h2>
-          <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          <p className="mt-3 text-center text-muted-plum">
+            {locale === "cy"
+              ? "Cliciwch ar sir i weld cartrefi gofal yn yr ardal"
+              : "Click a county to see care homes in the area"}
+          </p>
+
+          {/* Map for desktop/tablet */}
+          <div className="mt-10 hidden sm:block">
+            <WalesMap countyCounts={countyCounts} />
+          </div>
+
+          {/* County list for mobile */}
+          <div className="mt-8 grid grid-cols-2 gap-2 sm:hidden">
             {counties.map((county) => (
               <Link
                 key={county.slug}
                 href={`/cartrefi-gofal/${county.slug}`}
-                className="group rounded-[16px] border border-blush-grey bg-white p-4 shadow-card transition-all hover:shadow-modal hover:border-primary"
+                className="rounded-[12px] border border-blush-grey bg-white px-3 py-2.5 text-sm font-body font-semibold text-dusk transition-colors hover:bg-primary hover:text-white"
               >
-                <p className="font-heading font-bold text-dusk group-hover:text-primary transition-colors">
-                  {locale === "cy" ? county.name_cy : county.name_en}
-                </p>
+                {locale === "cy" ? county.name_cy : county.name_en}
                 {countyCounts[county.slug] > 0 && (
-                  <p className="mt-1 text-xs text-muted-plum">
-                    {countyCounts[county.slug]} {locale === "cy" ? "cartref gofal" : "care homes"}
-                  </p>
+                  <span className="ml-1 text-xs text-muted-plum">({countyCounts[county.slug]})</span>
                 )}
               </Link>
             ))}
