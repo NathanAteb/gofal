@@ -20,19 +20,19 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-blush-grey bg-white/95 backdrop-blur-sm">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-1 text-xl font-heading font-bold">
+        {/* Logo — clean text, no box */}
+        <Link href="/" className="text-xl font-heading font-bold tracking-tight">
           <span className="text-dusk">gofal</span>
           <span className="text-primary">.wales</span>
         </Link>
 
         {/* Desktop Nav */}
-        <nav className="hidden items-center gap-6 md:flex">
+        <nav className="hidden items-center gap-5 lg:gap-6 md:flex">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm font-body font-semibold text-muted-plum transition-colors hover:text-primary"
+              className="whitespace-nowrap text-sm font-body font-semibold text-muted-plum transition-colors hover:text-primary"
             >
               {link.label}
             </Link>

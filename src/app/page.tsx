@@ -53,15 +53,13 @@ export default function HomePage() {
       />
 
       {/* Hero */}
-      <section className="relative overflow-hidden bg-primary-dark py-20 text-white sm:py-28">
-        {/* Hero background image */}
-        <img
-          src="https://images.unsplash.com/photo-1573155993874-d5d48af862ba?w=1920&q=80&fm=webp&fit=crop"
-          alt="Tirwedd Cymru / Welsh landscape"
-          className="absolute inset-0 h-full w-full object-cover"
-          loading="eager"
-        />
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-dark/90 via-primary/80 to-primary-dark/90" />
+      <section className="relative overflow-hidden py-20 text-white sm:py-28" style={{ background: "linear-gradient(135deg, #4A2F4E 0%, #7B5B7E 40%, #A68AAB 70%, #7B5B7E 100%)" }}>
+        {/* Subtle decorative shapes */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-white/5" />
+          <div className="absolute -bottom-32 -left-32 h-[500px] w-[500px] rounded-full bg-white/5" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[600px] rounded-full bg-white/[0.02]" />
+        </div>
         <div className="relative mx-auto max-w-4xl px-4 text-center sm:px-6">
           <h1 className="font-heading text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">
             {t("hero.title")}
@@ -84,8 +82,14 @@ export default function HomePage() {
           {[
             { value: "1,000+", label: t("stats.care_homes") },
             { value: "22", label: t("stats.counties") },
-            { value: "100%", label: t("stats.welsh_language") },
-            { value: "100%", label: t("stats.free_service") },
+            {
+              value: "CIW",
+              label: locale === "cy" ? "Data wedi'i wirio" : "Verified data",
+            },
+            {
+              value: "🏴",
+              label: locale === "cy" ? "Cymraeg yn gyntaf" : "Welsh first",
+            },
           ].map((stat) => (
             <div
               key={stat.label}
