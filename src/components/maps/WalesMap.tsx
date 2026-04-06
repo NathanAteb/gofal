@@ -29,57 +29,58 @@ export function WalesMap({ countyCounts = {} }: WalesMapProps) {
   };
 
   return (
-    <div className="relative w-full max-w-lg mx-auto">
-      <svg
-        viewBox={`0 0 ${WALES_SVG_WIDTH} ${WALES_SVG_HEIGHT}`}
-        className="w-full h-auto"
-        role="img"
-        aria-label={locale === "cy" ? "Map o Gymru yn dangos 22 sir" : "Map of Wales showing 22 counties"}
-      >
-        {countyPaths.map((county) => {
-          const isHovered = hoveredSlug === county.slug;
+    <svg
+      viewBox={`0 0 ${WALES_SVG_WIDTH} ${WALES_SVG_HEIGHT}`}
+      className="mx-auto block h-auto w-full max-w-lg"
+      role="img"
+      aria-label={locale === "cy" ? "Map o Gymru yn dangos 22 sir" : "Map of Wales showing 22 counties"}
+    >
+      {countyPaths.map((county) => {
+        const isHovered = hoveredSlug === county.slug;
 
-          return (
-            <g key={county.slug}>
-              <path
-                d={county.path}
-                fill={isHovered ? "#7B5B7E" : "#FBF7F3"}
-                stroke="#DDD4CE"
-                strokeWidth={isHovered ? 2 : 1}
-                className="cursor-pointer transition-colors duration-150"
-                role="link"
-                tabIndex={0}
-                aria-label={`${getCountyName(county.slug)}${countyCounts[county.slug] ? ` — ${countyCounts[county.slug]} ${locale === "cy" ? "cartref gofal" : "care homes"}` : ""}`}
-                onMouseEnter={() => setHoveredSlug(county.slug)}
-                onMouseLeave={() => setHoveredSlug(null)}
-                onFocus={() => setHoveredSlug(county.slug)}
-                onBlur={() => setHoveredSlug(null)}
-                onClick={() => handleClick(county.slug)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    handleClick(county.slug);
-                  }
-                }}
-              />
-              {/* Subtle inline label */}
-              <text
-                x={county.center[0]}
-                y={county.center[1]}
-                textAnchor="middle"
-                dominantBaseline="central"
-                className={`pointer-events-none font-heading font-bold transition-opacity duration-150 ${
-                  isHovered
-                    ? "fill-white text-[11px] opacity-100"
-                    : "fill-muted-plum text-[8px] opacity-60"
-                }`}
-              >
-                {getCountyName(county.slug)}
-              </text>
-            </g>
-          );
-        })}
-      </svg>
-    </div>
+        return (
+          <g
+            key={county.slug}
+            onMouseEnter={() => setHoveredSlug(county.slug)}
+            onMouseLeave={() => setHoveredSlug(null)}
+            onFocus={() => setHoveredSlug(county.slug)}
+            onBlur={() => setHoveredSlug(null)}
+            onClick={() => handleClick(county.slug)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleClick(county.slug);
+              }
+            }}
+            className="cursor-pointer"
+            role="link"
+            tabIndex={0}
+            aria-label={`${getCountyName(county.slug)}${countyCounts[county.slug] ? ` — ${countyCounts[county.slug]} ${locale === "cy" ? "cartref gofal" : "care homes"}` : ""}`}
+          >
+            <path
+              d={county.path}
+              fill={isHovered ? "#7B5B7E" : "#FBF7F3"}
+              stroke="#DDD4CE"
+              strokeWidth={1}
+              className="transition-colors duration-150"
+            />
+            <text
+              x={county.center[0]}
+              y={county.center[1]}
+              textAnchor="middle"
+              dominantBaseline="central"
+              className="pointer-events-none select-none"
+              fill={isHovered ? "#FFFFFF" : "#6B5C6B"}
+              fontSize={isHovered ? 11 : 8}
+              fontWeight={isHovered ? 700 : 600}
+              fontFamily="var(--font-poppins), sans-serif"
+              opacity={isHovered ? 1 : 0.6}
+            >
+              {getCountyName(county.slug)}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
   );
 }
