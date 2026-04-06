@@ -3,8 +3,28 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useI18n } from "@/lib/i18n/context";
+import { useLearnWelsh } from "@/lib/i18n/learn-welsh";
 import { LanguageToggle } from "./LanguageToggle";
 import { WelshWord } from "@/components/ui/WelshWord";
+
+function LearnWelshButton() {
+  const { enabled, toggle } = useLearnWelsh();
+  return (
+    <button
+      onClick={toggle}
+      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-body font-semibold transition-colors ${
+        enabled
+          ? "bg-accent/15 text-accent border border-accent/30"
+          : "bg-ivory text-muted-plum border border-blush-grey hover:border-accent hover:text-accent"
+      }`}
+      aria-label={enabled ? "Disable Welsh learning tooltips" : "Enable Welsh learning tooltips"}
+      title="Dysgu Cymraeg / Learn Welsh"
+    >
+      <span className="text-sm leading-none">📖</span>
+      Dysgu
+    </button>
+  );
+}
 
 export function Header() {
   const { t } = useI18n();
@@ -38,6 +58,7 @@ export function Header() {
               <WelshWord en={link.en}>{link.label}</WelshWord>
             </Link>
           ))}
+          <LearnWelshButton />
           <LanguageToggle />
         </nav>
 
@@ -72,7 +93,8 @@ export function Header() {
               {link.label}
             </Link>
           ))}
-          <div className="pt-2">
+          <div className="flex items-center gap-3 pt-2">
+            <LearnWelshButton />
             <LanguageToggle />
           </div>
         </nav>
