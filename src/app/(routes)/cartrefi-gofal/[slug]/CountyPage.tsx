@@ -132,7 +132,7 @@ export function CountyPage({ county }: Props) {
           <SkeletonGrid count={6} />
         </div>
       ) : homes.length > 0 ? (
-        <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-6 flex flex-col gap-4">
           {homes.map((home) => (
             <CareHomeCard key={home.id} home={home} />
           ))}
