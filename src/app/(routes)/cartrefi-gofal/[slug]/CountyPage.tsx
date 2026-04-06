@@ -17,6 +17,7 @@ export function CountyPage({ county }: Props) {
   const { locale, t } = useI18n();
   const [homes, setHomes] = useState<CareHomeWithProfile[]>([]);
   const [total, setTotal] = useState(0);
+  const [avgFee, setAvgFee] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<SearchFilters>({ county: county.slug, page: 1 });
 
@@ -36,8 +37,16 @@ export function CountyPage({ county }: Props) {
     try {
       const res = await fetch(`/api/search?${params.toString()}`);
       const data = await res.json();
-      setHomes(data.homes || []);
+      const fetchedHomes = data.homes || [];
+      setHomes(fetchedHomes);
       setTotal(data.total || 0);
+      // Calculate average fee
+      const fees = fetchedHomes
+        .map((h: any) => h.care_home_profiles?.weekly_fee_from)
+        .filter((f: any) => f != null && f > 0);
+      if (fees.length > 0) {
+        setAvgFee(Math.round(fees.reduce((a: number, b: number) => a + b, 0) / fees.length));
+      }
     } catch {
       setHomes([]);
     } finally {
@@ -54,7 +63,25 @@ export function CountyPage({ county }: Props) {
     : `Find care homes in ${county.name_en}. We have information about every registered care home in the county, including Care Inspectorate Wales (CIW) ratings, Active Offer levels, and contact details. ${welshPct}% of ${county.name_en}'s population speaks Welsh.`;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+    <div>
+      {/* County header image */}
+      <div className="relative h-48 sm:h-64 bg-primary-dark overflow-hidden">
+        <img
+          src={`https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?w=1200&q=80&fm=webp&fit=crop`}
+          alt={`${county.name_cy} / ${county.name_en} — Cymru / Wales`}
+          className="h-full w-full object-cover opacity-60"
+          loading="eager"
+        />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <h1 className="font-heading text-3xl font-bold text-white sm:text-4xl lg:text-5xl drop-shadow-lg">
+            {locale === "cy"
+              ? `Cartrefi Gofal yn ${county.name_cy}`
+              : `Care Homes in ${county.name_en}`}
+          </h1>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
       <Breadcrumbs
         items={[
           { label_cy: "Cartrefi Gofal", label_en: "Care Homes", href: "/cartrefi-gofal" },
@@ -63,12 +90,7 @@ export function CountyPage({ county }: Props) {
       />
 
       <div className="mt-6">
-        <h1 className="font-heading text-3xl font-bold sm:text-4xl">
-          {locale === "cy"
-            ? `Cartrefi Gofal yn ${county.name_cy}`
-            : `Care Homes in ${county.name_en}`}
-        </h1>
-        <p className="mt-3 max-w-3xl text-muted-plum leading-relaxed">
+        <p className="max-w-3xl text-muted-plum leading-relaxed">
           {introText}
         </p>
       </div>
@@ -78,6 +100,11 @@ export function CountyPage({ county }: Props) {
         <div className="rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
           {total} {locale === "cy" ? "cartref gofal" : "care homes"}
         </div>
+        {avgFee && (
+          <div className="rounded-full bg-secondary/10 px-4 py-2 text-sm font-semibold text-secondary">
+            ~£{avgFee.toLocaleString("en-GB")} {locale === "cy" ? "yr wythnos (cyfartaledd)" : "per week (average)"}
+          </div>
+        )}
         <div className="rounded-full bg-accent/10 px-4 py-2 text-sm font-semibold text-accent">
           {welshPct}% {locale === "cy" ? "Cymraeg" : "Welsh speakers"}
         </div>
@@ -115,6 +142,7 @@ export function CountyPage({ county }: Props) {
           <p className="text-lg text-muted-plum">{t("directory.no_results")}</p>
         </div>
       )}
+    </div>
     </div>
   );
 }

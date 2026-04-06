@@ -49,6 +49,19 @@ export function GuideContent({ guide }: Props) {
           </div>
         </header>
 
+        {/* Featured image */}
+        <div className="mt-6 relative h-56 sm:h-72 rounded-[16px] overflow-hidden">
+          <img
+            src={guide.category === "county"
+              ? "https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?w=900&q=80&fm=webp&fit=crop"
+              : "https://images.unsplash.com/photo-1511895426328-dc8714191300?w=900&q=80&fm=webp&fit=crop"
+            }
+            alt={`${guide.title_cy} / ${guide.title_en}`}
+            className="h-full w-full object-cover"
+            loading="eager"
+          />
+        </div>
+
         <div className="mt-8 prose prose-lg max-w-none text-muted-plum prose-headings:text-dusk prose-headings:font-heading prose-a:text-primary prose-strong:text-dusk prose-li:marker:text-primary">
           {content.split("\n\n").map((block, i) => {
             if (block.startsWith("## ")) {

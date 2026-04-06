@@ -5,6 +5,9 @@ import { CareHomeProfile } from "./CareHomeProfile";
 import { CountyPage } from "./CountyPage";
 import type { Metadata } from "next";
 
+// ISR: revalidate every 24 hours
+export const revalidate = 86400;
+
 interface Props {
   params: Promise<{ slug: string }>;
 }

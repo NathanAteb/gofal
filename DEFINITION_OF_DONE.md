@@ -50,7 +50,7 @@ Each county page must have:
 - [x] Bilingual intro copy (150-200 words, unique per county)
 - [x] Care home count for that county
 - [x] Filterable grid of all homes in county
-- [ ] Average weekly fee for county
+- [x] Average weekly fee for county
 - [x] Welsh speaker percentage for county (from 2021 census data)
 - [x] Link to CIW data for that county
 - [x] Correct Welsh county name in Welsh mode
@@ -71,7 +71,7 @@ Each profile must have:
 - [x] Local authority
 - [x] Weekly fee range (if claimed and completed)
 - [x] Welsh language notes (if claimed)
-- [ ] Photo gallery (Unsplash fallback if not claimed — relevant care/Wales imagery)
+- [x] Photo gallery (Unsplash fallback if not claimed — relevant care/Wales imagery)
 - [x] Sticky enquiry panel desktop / bottom sheet mobile
 - [x] Claim listing CTA if unclaimed
 - [x] BreadcrumbList navigation
@@ -117,7 +117,7 @@ Each guide must have:
 - [x] Author attribution (gofal.wales team)
 - [x] Published date
 - [x] Schema markup (Article type)
-- [ ] Featured image from Unsplash (relevant, licensed)
+- [x] Featured image from Unsplash (relevant, licensed)
 
 ---
 
@@ -127,22 +127,22 @@ Every page that needs an image and doesn't have a real photo must use Unsplash.
 
 ### Image requirements
 - [x] Unsplash API integration built (free tier, proper attribution)
-- [ ] Care home profile fallback: search "care home Wales" or "elderly care Wales"
-- [ ] County pages: search "[county name] Wales landscape"
-- [ ] Guide articles: contextually relevant image per guide topic
-- [ ] Homepage hero: search "Wales landscape" or "Welsh community"
-- [ ] All images: next/image with WebP, lazy load, proper alt text
-- [ ] Alt text is bilingual (Welsh first)
-- [ ] Attribution displayed: "Photo by [name] on Unsplash"
-- [ ] No stock photo clichés — filter for authentic imagery
+- [x] Care home profile fallback: search "care home Wales" or "elderly care Wales"
+- [x] County pages: search "[county name] Wales landscape"
+- [x] Guide articles: contextually relevant image per guide topic
+- [x] Homepage hero: search "Wales landscape" or "Welsh community"
+- [x] All images: next/image with WebP, lazy load, proper alt text
+- [x] Alt text is bilingual (Welsh first)
+- [x] Attribution displayed: "Photo by [name] on Unsplash"
+- [x] No stock photo clichés — filter for authentic imagery
 
 ### Specific image placements
-- [ ] Homepage hero background
-- [ ] Homepage founding story section — personal/community feel
-- [ ] Each county page header
-- [ ] Each guide article featured image
-- [ ] Care home card fallback (when no claimed photos)
-- [ ] Care home profile gallery fallback (3 images)
+- [x] Homepage hero background
+- [x] Homepage founding story section — personal/community feel
+- [x] Each county page header
+- [x] Each guide article featured image
+- [x] Care home card fallback (when no claimed photos)
+- [x] Care home profile gallery fallback (3 images)
 - [x] About page
 - [x] For providers page
 
@@ -204,18 +204,18 @@ Every page that needs an image and doesn't have a real photo must use Unsplash.
 - [x] Care home profile pages — all data displayed
 - [x] Enquiry form — saves to Supabase, emails care home, confirms to family
 - [x] Claim listing flow — form, email verification, profile editor
-- [ ] Enhanced profile: description editor, photo upload (Supabase Storage)
+- [x] Enhanced profile: description editor, photo upload (Supabase Storage)
 - [x] Admin dashboard: claims queue, enquiries, homes management
 - [x] Stripe payment for enhanced listing tier
-- [ ] Active Offer self-assessment tool (for claimed homes)
+- [x] Active Offer self-assessment tool (for claimed homes)
 - [x] Map view on directory and county pages (Leaflet or Mapbox free tier)
 - [x] "Near me" using browser geolocation
 - [x] Print-friendly care home profile
 - [x] Share care home profile (native share API on mobile)
 
 ### Performance features
-- [ ] ISR (Incremental Static Regeneration) on all care home pages — 24hr revalidation
-- [ ] ISR on county pages — 24hr revalidation
+- [x] ISR (Incremental Static Regeneration) on all care home pages — 24hr revalidation
+- [x] ISR on county pages — 24hr revalidation
 - [x] Static generation on guide pages
 - [x] Optimistic UI on enquiry form submission
 - [x] Skeleton loading states on all data-fetching components

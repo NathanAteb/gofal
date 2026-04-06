@@ -31,7 +31,14 @@ export default function HomePage() {
 
       {/* Hero */}
       <section className="relative overflow-hidden bg-primary-dark py-20 text-white sm:py-28">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-dark via-primary to-primary-dark opacity-90" />
+        {/* Hero background image */}
+        <img
+          src="https://images.unsplash.com/photo-1573155993874-d5d48af862ba?w=1920&q=80&fm=webp&fit=crop"
+          alt="Tirwedd Cymru / Welsh landscape"
+          className="absolute inset-0 h-full w-full object-cover"
+          loading="eager"
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-dark/90 via-primary/80 to-primary-dark/90" />
         <div className="relative mx-auto max-w-4xl px-4 text-center sm:px-6">
           <h1 className="font-heading text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">
             {t("hero.title")}
@@ -152,19 +159,31 @@ export default function HomePage() {
       </section>
 
       {/* Founding Story */}
-      <section className="mx-auto max-w-3xl px-4 py-16 text-center sm:px-6 sm:py-24">
-        <h2 className="font-heading text-3xl font-bold sm:text-4xl">
-          {t("story.title")}
-        </h2>
-        <p className="mt-6 text-lg leading-relaxed text-muted-plum">
-          {t("story.paragraph1")}
-        </p>
-        <p className="mt-4 text-lg leading-relaxed text-muted-plum">
-          {t("story.paragraph2")}
-        </p>
-        <p className="mt-6 font-heading font-bold text-primary">
-          {t("story.author")}
-        </p>
+      <section className="mx-auto max-w-5xl px-4 py-16 sm:px-6 sm:py-24">
+        <div className="grid gap-10 items-center md:grid-cols-2">
+          <div className="relative h-64 md:h-80 rounded-[24px] overflow-hidden">
+            <img
+              src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80&fm=webp&fit=crop"
+              alt="Cymuned Gymreig / Welsh community"
+              className="h-full w-full object-cover"
+              loading="lazy"
+            />
+          </div>
+          <div className="text-center md:text-left">
+            <h2 className="font-heading text-3xl font-bold sm:text-4xl">
+              {t("story.title")}
+            </h2>
+            <p className="mt-6 text-lg leading-relaxed text-muted-plum">
+              {t("story.paragraph1")}
+            </p>
+            <p className="mt-4 text-lg leading-relaxed text-muted-plum">
+              {t("story.paragraph2")}
+            </p>
+            <p className="mt-6 font-heading font-bold text-primary">
+              {t("story.author")}
+            </p>
+          </div>
+        </div>
       </section>
 
       {/* CTA */}

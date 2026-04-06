@@ -24,20 +24,12 @@ export function CareHomeCard({ home }: CareHomeCardProps) {
     >
       {/* Image */}
       <div className="relative h-44 overflow-hidden rounded-t-[16px] bg-linen">
-        {photoUrl ? (
-          <img
-            src={photoUrl}
-            alt={name}
-            className="h-full w-full object-cover transition-transform group-hover:scale-105"
-            loading="lazy"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center text-primary-light">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4M9 9v.01M9 12v.01M9 15v.01M9 18v.01" />
-            </svg>
-          </div>
-        )}
+        <img
+          src={photoUrl || `https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=600&q=75&fm=webp&fit=crop&txt=${encodeURIComponent(name)}`}
+          alt={`${locale === "cy" && home.name_cy ? home.name_cy : home.name} / ${home.name}`}
+          className="h-full w-full object-cover transition-transform group-hover:scale-105"
+          loading="lazy"
+        />
 
         {/* Tier badges */}
         {home.is_featured && (

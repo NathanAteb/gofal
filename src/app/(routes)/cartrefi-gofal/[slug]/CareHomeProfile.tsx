@@ -103,23 +103,33 @@ export function CareHomeProfile({ home, related }: Props) {
             </div>
 
             {/* Photo gallery */}
-            {profile?.photos && profile.photos.length > 0 && (
-              <div className="mt-6">
-                <h2 className="font-heading text-xl font-bold">{t("profile.photos")}</h2>
-                <div className="mt-3 grid grid-cols-3 gap-2">
-                  {profile.photos.slice(0, 6).map((photo, i) => (
-                    <div key={i} className="aspect-[4/3] overflow-hidden rounded-[12px] bg-linen">
-                      <img
-                        src={photo}
-                        alt={`${name} - ${i + 1}`}
-                        className="h-full w-full object-cover"
-                        loading="lazy"
-                      />
-                    </div>
-                  ))}
-                </div>
+            <div className="mt-6">
+              <h2 className="font-heading text-xl font-bold">{t("profile.photos")}</h2>
+              <div className="mt-3 grid grid-cols-3 gap-2">
+                {(profile?.photos && profile.photos.length > 0
+                  ? profile.photos.slice(0, 6)
+                  : [
+                      "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=400&q=75&fm=webp&fit=crop",
+                      "https://images.unsplash.com/photo-1516307365426-bea591f05011?w=400&q=75&fm=webp&fit=crop",
+                      "https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=400&q=75&fm=webp&fit=crop",
+                    ]
+                ).map((photo, i) => (
+                  <div key={i} className="aspect-[4/3] overflow-hidden rounded-[12px] bg-linen">
+                    <img
+                      src={photo}
+                      alt={`${name} — ${locale === "cy" ? "llun" : "photo"} ${i + 1}`}
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                ))}
               </div>
-            )}
+              {!(profile?.photos && profile.photos.length > 0) && (
+                <p className="mt-2 text-[10px] text-muted-plum/60">
+                  Photos by Unsplash contributors
+                </p>
+              )}
+            </div>
 
             {/* About */}
             {description && (
