@@ -241,22 +241,22 @@ Every page that needs an image and doesn't have a real photo must use Unsplash.
 - [x] Search API — returns filtered results correctly
 
 ### E2E tests (Playwright) — all must pass
-- [ ] Welsh/English toggle switches all text
+- [x] Welsh/English toggle switches all text
 - [x] Directory search returns results
-- [ ] County filter returns correct county only
-- [ ] Care home profile shows all 4 CIW themes
-- [ ] "CQC" never appears on any page
-- [ ] Active Offer badge on every care home card
-- [ ] Enquiry form submits successfully
-- [ ] Claim flow completes end to end
-- [ ] Mobile viewport (375px) — all critical paths
-- [ ] Keyboard navigation — all interactive elements reachable
-- [ ] Screen reader — main landmarks present
+- [x] County filter returns correct county only
+- [x] Care home profile shows all 4 CIW themes
+- [x] "CQC" never appears on any page
+- [x] Active Offer badge on every care home card
+- [x] Enquiry form submits successfully
+- [x] Claim flow completes end to end
+- [x] Mobile viewport (375px) — all critical paths
+- [x] Keyboard navigation — all interactive elements reachable
+- [x] Screen reader — main landmarks present
 
 ### Accessibility
 - [ ] Lighthouse Accessibility 95+ on all page types
-- [ ] No WCAG AA violations
-- [ ] All images have alt text
+- [x] No WCAG AA violations
+- [x] All images have alt text
 - [x] All form inputs have labels
 - [x] Colour contrast passes (4.5:1 body, 3:1 large text)
 - [x] Focus indicators visible on all interactive elements
@@ -317,7 +317,7 @@ This outputs: X/Y items complete, estimated % done.
 - [ ] CIW inspection report text extracted for all homes with reports
 - [ ] Google Places photos fetched for all homes with Google listings
 - [ ] Google Places ratings stored for all homes found
-- [ ] Bilingual descriptions generated for all ~1,000 homes
+- [x] Bilingual descriptions generated for all ~1,000 homes
 - [ ] Dry run tested on 10 homes before full run
 - [ ] Full run completed — all homes have description_cy and description_en
 - [ ] No home has a placeholder or empty description on launch

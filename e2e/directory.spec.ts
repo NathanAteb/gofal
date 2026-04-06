@@ -8,7 +8,7 @@ test.describe("Directory", () => {
 
   test("has search bar", async ({ page }) => {
     await page.goto("/cartrefi-gofal");
-    await expect(page.locator('input[type="text"]')).toBeVisible();
+    await expect(page.locator('input[type="search"]')).toBeVisible();
   });
 
   test("has filter dropdowns", async ({ page }) => {

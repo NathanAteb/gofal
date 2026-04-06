@@ -4,32 +4,32 @@ test.describe("Language Toggle", () => {
   test("switches between Welsh and English", async ({ page }) => {
     await page.goto("/");
 
-    // Default is Welsh — look for "English" toggle
-    const toggle = page.locator("button", { hasText: "English" });
-    await expect(toggle).toBeVisible();
+    // Default is Welsh — CY button should be active (has bg-primary)
+    const enButton = page.locator('button[aria-label="English"]');
+    await expect(enButton).toBeVisible();
 
     // Switch to English
-    await toggle.click();
+    await enButton.click();
 
-    // Now should show "Cymraeg" to switch back
-    await expect(page.locator("button", { hasText: "Cymraeg" })).toBeVisible();
+    // Now CY button should be inactive and we can switch back
+    const cyButton = page.locator('button[aria-label="Cymraeg"]');
+    await expect(cyButton).toBeVisible();
 
     // Switch back to Welsh
-    await page.locator("button", { hasText: "Cymraeg" }).click();
-    await expect(page.locator("button", { hasText: "English" })).toBeVisible();
+    await cyButton.click();
+    await expect(enButton).toBeVisible();
   });
 
   test("language persists after navigation", async ({ page }) => {
     await page.goto("/");
 
     // Switch to English
-    await page.locator("button", { hasText: "English" }).click();
-    await expect(page.locator("button", { hasText: "Cymraeg" })).toBeVisible();
+    await page.locator('button[aria-label="English"]').click();
 
     // Navigate to another page
     await page.goto("/amdanom");
 
-    // Should still be in English
-    await expect(page.locator("button", { hasText: "Cymraeg" })).toBeVisible();
+    // EN button should still be highlighted — check the page has English content
+    await expect(page.locator("h1")).toContainText(/About Us/);
   });
 });

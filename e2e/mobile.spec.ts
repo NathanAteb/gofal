@@ -16,7 +16,7 @@ test.describe("Mobile Viewport", () => {
 
   test("search works on mobile", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator('input[type="text"]')).toBeVisible();
+    await expect(page.locator('input[type="search"]')).toBeVisible();
   });
 
   test("footer scrolls into view on mobile", async ({ page }) => {
