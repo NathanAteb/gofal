@@ -29,6 +29,7 @@ export function WalesMap({ countyCounts = {} }: WalesMapProps) {
   };
 
   return (
+    <>
     <svg
       viewBox={`0 0 ${WALES_SVG_WIDTH} ${WALES_SVG_HEIGHT}`}
       className="mx-auto block h-auto w-full max-w-lg"
@@ -69,11 +70,11 @@ export function WalesMap({ countyCounts = {} }: WalesMapProps) {
               y={county.center[1]}
               textAnchor="middle"
               dominantBaseline="central"
-              className="pointer-events-none select-none"
-              fill={isHovered ? "#FFFFFF" : "#6B5C6B"}
-              fontSize={isHovered ? 11 : 8}
+              className="pointer-events-none select-none hidden sm:block"
+              fill={isHovered ? "#FFFFFF" : "#2C2430"}
+              fontSize={isHovered ? 11 : 9}
               fontWeight={isHovered ? 700 : 600}
-              fontFamily="var(--font-poppins), sans-serif"
+              fontFamily="var(--font-nunito), sans-serif"
               opacity={isHovered ? 1 : 0.6}
             >
               {getCountyName(county.slug)}
@@ -82,5 +83,14 @@ export function WalesMap({ countyCounts = {} }: WalesMapProps) {
         );
       })}
     </svg>
+    {/* Screen reader accessible county list */}
+    <ul className="sr-only">
+      {countyPaths.map((county) => (
+        <li key={county.slug}>
+          <a href={`/cartrefi-gofal/${county.slug}`}>{getCountyName(county.slug)}</a>
+        </li>
+      ))}
+    </ul>
+    </>
   );
 }

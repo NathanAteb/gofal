@@ -17,7 +17,7 @@ export default function EnquiryConfirmationPage() {
       <p className="mt-3 text-muted-plum">{t("enquiry.success_message")}</p>
       <Link
         href="/cartrefi-gofal"
-        className="mt-8 inline-block rounded-full bg-secondary px-6 py-3 font-body font-bold text-white transition-colors hover:bg-secondary/90"
+        className="mt-8 inline-block rounded-full bg-secondary px-6 py-3 font-body font-bold text-white transition-colors hover:bg-secondary-hover"
       >
         {t("nav.directory")}
       </Link>

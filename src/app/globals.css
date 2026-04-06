@@ -6,14 +6,17 @@
   --color-primary: #7B5B7E;
   --color-primary-light: #A68AAB;
   --color-primary-dark: #4A2F4E;
-  --color-secondary: #D4806A;
-  --color-secondary-light: #F0C2B5;
+  --color-secondary: #B5603A;
+  --color-secondary-light: #D4806A;
+  --color-secondary-hover: #A0522D;
+  --color-secondary-active: #8B4513;
   --color-accent: #E5AD3E;
   --color-accent-light: #F5DFA0;
   --color-ivory: #FBF7F3;
   --color-linen: #F0E8DF;
   --color-dusk: #2C2430;
   --color-muted-plum: #6B5C6B;
+  --color-dark-heather: #5C3D5E;
   --color-blush-grey: #DDD4CE;
 
   /* Fonts */
@@ -70,7 +73,7 @@ input::-ms-reveal {
 
 /* Focus indicators for accessibility */
 :focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 3px solid var(--color-secondary);
   outline-offset: 2px;
   border-radius: 4px;
 }

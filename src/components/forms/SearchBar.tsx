@@ -55,7 +55,7 @@ export function SearchBar({ defaultValue = "", size = "md" }: SearchBarProps) {
       </div>
       <button
         type="submit"
-        className={`shrink-0 rounded-full bg-secondary font-body font-bold text-white transition-colors hover:bg-secondary/90 ${
+        className={`shrink-0 rounded-full bg-secondary font-body font-bold text-white transition-colors hover:bg-secondary-hover ${
           isLg ? "px-8 py-4 text-lg" : "px-5 py-2.5 text-sm"
         }`}
       >

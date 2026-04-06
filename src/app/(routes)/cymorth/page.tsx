@@ -125,7 +125,7 @@ export default function ConciergeHelpPage() {
         <button
           type="submit"
           disabled={status === "sending"}
-          className="w-full rounded-full bg-secondary px-6 py-3 font-body font-bold text-white transition-colors hover:bg-secondary/90 disabled:opacity-50"
+          className="w-full rounded-full bg-secondary px-6 py-3 font-body font-bold text-white transition-colors hover:bg-secondary-hover disabled:opacity-50"
         >
           {status === "sending"
             ? (locale === "cy" ? "Yn anfon..." : "Sending...")

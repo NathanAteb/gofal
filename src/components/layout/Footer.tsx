@@ -74,8 +74,8 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="font-heading font-bold text-sm uppercase tracking-wider text-secondary">
-              &nbsp;
+            <h3 className="font-body font-semibold text-[13px] uppercase tracking-[0.08em] text-white/60">
+              {locale === "cy" ? "Siroedd eraill" : "More counties"}
             </h3>
             <ul className="mt-3 space-y-1.5">
               {counties.slice(11).map((county) => (

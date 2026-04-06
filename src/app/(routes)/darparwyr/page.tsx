@@ -96,7 +96,7 @@ export default function ProvidersPage() {
         </p>
         <Link
           href="/cartrefi-gofal"
-          className="inline-block rounded-full bg-secondary px-8 py-4 text-lg font-body font-bold text-white transition-colors hover:bg-secondary/90"
+          className="inline-block rounded-full bg-secondary px-8 py-4 text-lg font-body font-bold text-white transition-colors hover:bg-secondary-hover"
         >
           {t("providers.cta")}
         </Link>

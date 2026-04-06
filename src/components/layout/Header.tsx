@@ -53,7 +53,7 @@ export function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className="whitespace-nowrap text-sm font-body font-semibold text-muted-plum transition-colors hover:text-primary"
+              className="whitespace-nowrap text-sm font-body font-semibold text-dark-heather transition-colors hover:text-primary"
             >
               <WelshWord en={link.en}>{link.label}</WelshWord>
             </Link>
@@ -88,7 +88,7 @@ export function Header() {
               key={link.href}
               href={link.href}
               onClick={() => setMobileOpen(false)}
-              className="block py-3 text-base font-body font-semibold text-muted-plum transition-colors hover:text-primary"
+              className="block py-3 text-base font-body font-semibold text-dark-heather transition-colors hover:text-primary"
             >
               {link.label}
             </Link>

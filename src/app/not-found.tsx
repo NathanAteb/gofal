@@ -22,7 +22,7 @@ export default function NotFound() {
       <div className="mt-8 flex gap-3">
         <Link
           href="/"
-          className="inline-block rounded-full bg-secondary px-7 py-3 font-body font-bold text-white transition-colors hover:bg-secondary/90"
+          className="inline-block rounded-full bg-secondary px-7 py-3 font-body font-bold text-white transition-colors hover:bg-secondary-hover"
         >
           {locale === "cy" ? "Yn ôl i'r hafan" : "Back to home"}
         </Link>

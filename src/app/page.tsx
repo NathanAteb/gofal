@@ -76,8 +76,13 @@ export default function HomePage() {
           <m.h1 className="font-heading text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl" variants={fadeUp} transition={{ duration: 0.7 }}>
             {t("hero.title")}
           </m.h1>
-          <m.p className="mx-auto mt-4 max-w-2xl text-lg text-primary-light sm:text-xl" variants={fadeUp} transition={{ duration: 0.7 }}>
-            {t("hero.subtitle")}
+          <m.p
+            className="mx-auto mt-4 max-w-[480px] font-body font-normal text-white/[0.92]"
+            style={{ fontSize: "20px", letterSpacing: "0.01em", lineHeight: 1.5 }}
+            variants={fadeUp}
+            transition={{ duration: 0.7 }}
+          >
+            {locale === "cy" ? "Dod o hyd i ofal Cymraeg — am ddim." : "Find Welsh-language care. Free."}
           </m.p>
           <m.div className="mx-auto mt-8 max-w-2xl" variants={fadeUp} transition={{ duration: 0.7 }}>
             <SearchBar size="lg" />
@@ -162,7 +167,7 @@ export default function HomePage() {
                 <h3 className="mt-4 font-heading text-xl font-bold">
                   <WelshWord en={item.title_en}>{item.title}</WelshWord>
                 </h3>
-                <p className="mt-2 text-muted-plum leading-relaxed">{item.desc}</p>
+                <p className="mx-auto mt-2 max-w-[240px] text-[15px] leading-[1.65]" style={{ color: "#4A3D4A" }}>{item.desc}</p>
               </m.div>
             ))}
           </m.div>
@@ -181,25 +186,25 @@ export default function HomePage() {
               transition={{ duration: 0.7 }}
             >
               {/* Pull quote */}
-              <div className="border-l-4 border-secondary pl-4 mb-6">
-                <p className="font-heading text-xl font-semibold text-primary sm:text-2xl leading-snug">
+              <div className="border-l-4 border-secondary pl-5 mb-6">
+                <p className="font-heading text-[18px] font-semibold text-primary sm:text-[22px] leading-snug">
                   {locale === "cy"
-                    ? "\"Roedd dod o hyd i ofal Cymraeg yn hunllef.\""
-                    : "\"Finding Welsh-language care was a nightmare.\""}
+                    ? "Roedd dod o hyd i ofal Cymraeg yn hunllef."
+                    : "Finding Welsh-language care was a nightmare."}
                 </p>
               </div>
               <h2 className="font-heading text-3xl font-bold sm:text-4xl">
                 <WelshWord en="Why gofal.wales?">{t("story.title")}</WelshWord>
               </h2>
-              <p className="mt-6 text-lg leading-[1.8] text-muted-plum" style={{ fontSize: "20px" }}>
+              <p className="mt-6 max-w-[560px] text-dusk leading-[1.8]" style={{ fontSize: "19px" }}>
                 {t("story.paragraph1")}
               </p>
-              <p className="mt-4 text-lg leading-[1.8] text-muted-plum" style={{ fontSize: "20px" }}>
+              <p className="mt-4 max-w-[560px] text-dusk leading-[1.8] mb-6" style={{ fontSize: "19px" }}>
                 {t("story.paragraph2")}
               </p>
-              <div className="mt-6">
+              <div className="mt-4">
                 <p className="font-heading font-bold text-primary">{t("story.author")}</p>
-                <p className="text-sm text-muted-plum">Llanelli, Cymru</p>
+                <p className="text-[14px] text-muted-plum">Ateb AI, Llanelli, Cymru</p>
               </div>
             </m.div>
             <m.div
@@ -272,22 +277,22 @@ export default function HomePage() {
 
       {/* ── 7. CTA ── Heather bg (P6) */}
       <section className="bg-primary py-16 text-center text-white sm:py-20">
-        <m.div className="mx-auto max-w-2xl px-4 sm:px-6" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerChildren}>
-          <m.h2 className="font-heading text-3xl font-bold sm:text-4xl" variants={fadeUp} transition={{ duration: 0.6 }}>
+        <m.div className="mx-auto max-w-[640px] px-4 sm:px-6" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerChildren}>
+          <m.h2 className="font-heading text-[26px] font-bold sm:text-[32px]" variants={fadeUp} transition={{ duration: 0.6 }}>
             {locale === "cy" ? "Barod i ddechrau chwilio?" : "Ready to start searching?"}
           </m.h2>
-          <m.p className="mt-4 text-lg text-white/80" variants={fadeUp} transition={{ duration: 0.6 }}>
+          <m.p className="mt-4 font-body text-[18px] text-white/[0.85]" variants={fadeUp} transition={{ duration: 0.6 }}>
             {locale === "cy"
-              ? "Mae pob cartref gofal yng Nghymru ar gofal.wales — am ddim."
-              : "Every care home in Wales is on gofal.wales — for free."}
+              ? "Mae pob cartref gofal yng Nghymru ar gofal.wales — am ddim i deuluoedd bob amser. Dewch o hyd i gartref sy'n siarad Cymraeg yn eich ardal chi."
+              : "Every care home in Wales is on gofal.wales — always free for families. Find a home that speaks Welsh in your area."}
           </m.p>
           <m.div variants={fadeUp} transition={{ duration: 0.6 }} className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
             <m.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 400 }}>
               <Link
                 href="/cartrefi-gofal"
-                className="inline-block rounded-full bg-secondary px-8 py-4 font-body text-lg font-bold text-white transition-colors hover:bg-secondary/90"
+                className="inline-block rounded-full bg-secondary px-8 py-4 font-body text-[16px] font-bold text-white transition-colors hover:bg-secondary-hover"
               >
-                {t("hero.search_button")}
+                {locale === "cy" ? "Dechrau chwilio nawr" : "Start searching now"}
               </Link>
             </m.div>
             <Link
