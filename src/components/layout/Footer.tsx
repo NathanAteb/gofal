@@ -2,7 +2,26 @@
 
 import Link from "next/link";
 import { useI18n } from "@/lib/i18n/context";
+import { useLearnWelsh } from "@/lib/i18n/learn-welsh";
 import { counties } from "@/lib/utils/counties";
+
+function LearnWelshToggle() {
+  const { enabled, toggle } = useLearnWelsh();
+  const { locale } = useI18n();
+
+  return (
+    <button
+      onClick={toggle}
+      className="inline-flex items-center gap-2 rounded-full border border-primary-light/30 px-3 py-1.5 text-xs text-primary-light/80 transition-colors hover:bg-primary-light/10 hover:text-white"
+      aria-label={enabled ? "Disable Welsh learning tooltips" : "Enable Welsh learning tooltips"}
+    >
+      <span className={`relative inline-block h-4 w-7 rounded-full transition-colors ${enabled ? "bg-accent" : "bg-primary-light/30"}`}>
+        <span className={`absolute top-0.5 h-3 w-3 rounded-full bg-white transition-transform ${enabled ? "translate-x-3.5" : "translate-x-0.5"}`} />
+      </span>
+      {locale === "cy" ? "Dysgu Cymraeg" : "Learn Welsh"}
+    </button>
+  );
+}
 
 export function Footer() {
   const { locale, t } = useI18n();
@@ -123,8 +142,9 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 border-t border-primary-light/20 pt-6 text-center text-xs text-primary-light/60">
-          {t("footer.copyright")}
+        <div className="mt-10 border-t border-primary-light/20 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-primary-light/60">
+          <span>{t("footer.copyright")}</span>
+          <LearnWelshToggle />
         </div>
       </div>
     </footer>

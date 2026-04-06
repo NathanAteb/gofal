@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins, Nunito } from "next/font/google";
 import { I18nProvider } from "@/lib/i18n/context";
+import { LearnWelshProvider } from "@/lib/i18n/learn-welsh";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Analytics } from "@vercel/analytics/next";
@@ -58,9 +59,11 @@ export default function RootLayout({
     <html lang="cy" className={`${poppins.variable} ${nunito.variable}`}>
       <body className="min-h-screen bg-ivory text-dusk antialiased">
         <I18nProvider>
-          <Header />
-          <main className="min-h-[calc(100vh-160px)]">{children}</main>
-          <Footer />
+          <LearnWelshProvider>
+            <Header />
+            <main className="min-h-[calc(100vh-160px)]">{children}</main>
+            <Footer />
+          </LearnWelshProvider>
         </I18nProvider>
         <Analytics />
       </body>

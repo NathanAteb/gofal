@@ -4,17 +4,18 @@ import Link from "next/link";
 import { useState } from "react";
 import { useI18n } from "@/lib/i18n/context";
 import { LanguageToggle } from "./LanguageToggle";
+import { WelshWord } from "@/components/ui/WelshWord";
 
 export function Header() {
   const { t } = useI18n();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const navLinks = [
-    { href: "/cartrefi-gofal", label: t("nav.directory") },
-    { href: "/canllawiau", label: t("nav.guides") },
-    { href: "/darparwyr", label: t("nav.providers") },
-    { href: "/amdanom", label: t("nav.about") },
-    { href: "/cysylltu", label: t("nav.contact") },
+    { href: "/cartrefi-gofal", label: t("nav.directory"), en: "Care Homes" },
+    { href: "/canllawiau", label: t("nav.guides"), en: "Guides" },
+    { href: "/darparwyr", label: t("nav.providers"), en: "For Providers" },
+    { href: "/amdanom", label: t("nav.about"), en: "About Us" },
+    { href: "/cysylltu", label: t("nav.contact"), en: "Contact" },
   ];
 
   return (
@@ -34,7 +35,7 @@ export function Header() {
               href={link.href}
               className="whitespace-nowrap text-sm font-body font-semibold text-muted-plum transition-colors hover:text-primary"
             >
-              {link.label}
+              <WelshWord en={link.en}>{link.label}</WelshWord>
             </Link>
           ))}
           <LanguageToggle />

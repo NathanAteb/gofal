@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { useI18n } from "@/lib/i18n/context";
 import { SearchBar } from "@/components/forms/SearchBar";
 import { WalesMap } from "@/components/maps/WalesMap";
+import { WelshWord } from "@/components/ui/WelshWord";
 import { counties } from "@/lib/utils/counties";
 
 export default function HomePage() {
@@ -80,15 +81,17 @@ export default function HomePage() {
       <section className="-mt-8 relative z-10 mx-auto max-w-5xl px-4 sm:px-6">
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           {[
-            { value: "1,000+", label: t("stats.care_homes") },
-            { value: "22", label: t("stats.counties") },
+            { value: "1,000+", label: t("stats.care_homes"), en: "Care homes" },
+            { value: "22", label: t("stats.counties"), en: "Counties" },
             {
               value: "CIW",
               label: locale === "cy" ? "Data wedi'i wirio" : "Verified data",
+              en: "Verified data",
             },
             {
               value: "🏴",
               label: locale === "cy" ? "Cymraeg yn gyntaf" : "Welsh first",
+              en: "Welsh first",
             },
           ].map((stat) => (
             <div
@@ -99,7 +102,7 @@ export default function HomePage() {
                 {stat.value}
               </p>
               <p className="mt-1 text-xs text-muted-plum sm:text-sm">
-                {stat.label}
+                <WelshWord en={stat.en}>{stat.label}</WelshWord>
               </p>
             </div>
           ))}
@@ -109,7 +112,7 @@ export default function HomePage() {
       {/* How it Works */}
       <section className="mx-auto max-w-5xl px-4 py-16 sm:px-6 sm:py-24">
         <h2 className="text-center font-heading text-3xl font-bold sm:text-4xl">
-          {t("how.title")}
+          <WelshWord en="How it works">{t("how.title")}</WelshWord>
         </h2>
         <div className="mt-12 grid gap-8 sm:grid-cols-3">
           {[
@@ -122,7 +125,9 @@ export default function HomePage() {
                 </svg>
               ),
               title: t("how.step1.title"),
+              title_en: "Search",
               desc: t("how.step1.desc"),
+              desc_en: "Search by location, care type, or Welsh language provision",
             },
             {
               step: "2",
@@ -135,7 +140,9 @@ export default function HomePage() {
                 </svg>
               ),
               title: t("how.step2.title"),
+              title_en: "Compare",
               desc: t("how.step2.desc"),
+              desc_en: "Compare CIW ratings, prices, and services",
             },
             {
               step: "3",
@@ -145,7 +152,9 @@ export default function HomePage() {
                 </svg>
               ),
               title: t("how.step3.title"),
+              title_en: "Connect",
               desc: t("how.step3.desc"),
+              desc_en: "Send an enquiry directly to the care home",
             },
           ].map((item) => (
             <div key={item.step} className="text-center">
@@ -153,7 +162,7 @@ export default function HomePage() {
                 {item.icon}
               </div>
               <h3 className="mt-4 font-heading text-xl font-bold">
-                {item.title}
+                <WelshWord en={item.title_en}>{item.title}</WelshWord>
               </h3>
               <p className="mt-2 text-muted-plum">{item.desc}</p>
             </div>
@@ -166,7 +175,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <h2 className="text-center font-heading text-3xl font-bold sm:text-4xl">
             {locale === "cy"
-              ? "Porwch yn ôl sir"
+              ? <WelshWord en="Browse by county">Porwch yn ôl sir</WelshWord>
               : "Browse by county"}
           </h2>
           <p className="mt-3 text-center text-muted-plum">
@@ -211,7 +220,7 @@ export default function HomePage() {
           </div>
           <div className="text-center md:text-left">
             <h2 className="font-heading text-3xl font-bold sm:text-4xl">
-              {t("story.title")}
+              <WelshWord en="Why gofal.wales?">{t("story.title")}</WelshWord>
             </h2>
             <p className="mt-6 text-lg leading-relaxed text-muted-plum">
               {t("story.paragraph1")}
