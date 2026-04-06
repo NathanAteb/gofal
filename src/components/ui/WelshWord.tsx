@@ -20,7 +20,19 @@ export function WelshWord({ children, en }: WelshWordProps) {
     setIsMobile("ontouchstart" in window);
   }, []);
 
-  // Only show tooltips in Welsh mode with learn feature on
+  // Dismiss on outside tap (mobile)
+  useEffect(() => {
+    if (!show || !isMobile || locale !== "cy" || !enabled) return;
+    function handleOutside(e: Event) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setShow(false);
+      }
+    }
+    document.addEventListener("touchstart", handleOutside);
+    return () => document.removeEventListener("touchstart", handleOutside);
+  }, [show, isMobile, locale, enabled]);
+
+  // Don't render tooltip UI when not in Welsh mode or feature disabled
   if (locale !== "cy" || !enabled) {
     return <>{children}</>;
   }
@@ -30,18 +42,6 @@ export function WelshWord({ children, en }: WelshWordProps) {
       setShow((prev) => !prev);
     }
   }
-
-  // Dismiss on outside tap (mobile)
-  useEffect(() => {
-    if (!show || !isMobile) return;
-    function handleOutside(e: Event) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setShow(false);
-      }
-    }
-    document.addEventListener("touchstart", handleOutside);
-    return () => document.removeEventListener("touchstart", handleOutside);
-  }, [show, isMobile]);
 
   return (
     <span

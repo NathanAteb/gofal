@@ -3,6 +3,17 @@
     "supabase": {
       "type": "http",
       "url": "https://mcp.supabase.com/mcp?project_ref=rnyrbyrhxpwwwawsgink"
+    },
+    "motion": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "https://api.motion.dev/registry.tgz?package=motion-studio-mcp&version=latest"
+      ],
+      "env": {
+        "TOKEN": "c72c6e92cd40daebc00d654653a8f2ffa0b90245e89c2fa7bd2d0556821dbe70"
+      }
     }
   }
 }
