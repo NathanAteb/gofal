@@ -6,7 +6,7 @@ const translations = {
   "nav.guides": { cy: "Canllawiau", en: "Guides" },
   "nav.about": { cy: "Amdanom Ni", en: "About Us" },
   "nav.contact": { cy: "Cysylltu", en: "Contact" },
-  "nav.providers": { cy: "I Ddarparwyr", en: "For Providers" },
+  "nav.providers": { cy: "Darparwyr", en: "Providers" },
   "nav.language": { cy: "English", en: "Cymraeg" },
 
   // Homepage Hero

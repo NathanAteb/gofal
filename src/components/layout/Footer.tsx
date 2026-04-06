@@ -142,7 +142,16 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 border-t border-primary-light/20 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-primary-light/60">
+        {/* Data attribution + trust */}
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-4 text-[11px] text-primary-light/50">
+          <span>Data: Arolygiaeth Gofal Cymru (OGL v3.0)</span>
+          <span>·</span>
+          <a href="https://www.trustpilot.com/review/gofal.wales" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-white">
+            {locale === "cy" ? "Graddiwch ni ar Trustpilot" : "Rate us on Trustpilot"} &rarr;
+          </a>
+        </div>
+
+        <div className="mt-6 border-t border-primary-light/20 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-primary-light/60">
           <span>{t("footer.copyright")}</span>
           <LearnWelshToggle />
         </div>
