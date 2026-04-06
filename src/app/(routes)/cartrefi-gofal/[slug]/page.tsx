@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { createServiceClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { getCountyBySlug, counties } from "@/lib/utils/counties";
 import { CareHomeProfile } from "./CareHomeProfile";
 import { CountyPage } from "./CountyPage";
@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   // It's a care home
   try {
-    const supabase = await createServiceClient();
+    const supabase = await createClient();
     const { data: home } = await supabase
       .from("care_homes")
       .select("name, name_cy, town, county")
@@ -62,7 +62,7 @@ export default async function DynamicPage({ params }: Props) {
 
   // It's a care home
   try {
-    const supabase = await createServiceClient();
+    const supabase = await createClient();
 
     const { data: home } = await supabase
       .from("care_homes")

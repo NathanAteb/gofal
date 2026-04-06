@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
   const perPage = Math.min(parseInt(params.get("per_page") || "12"), 50);
 
   try {
-    const supabase = await createServiceClient();
+    const supabase = await createClient();
     let dbQuery = supabase
       .from("care_homes")
       .select("*, care_home_profiles(*)", { count: "exact" })
