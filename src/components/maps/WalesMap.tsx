@@ -14,7 +14,6 @@ export function WalesMap({ countyCounts = {} }: WalesMapProps) {
   const { locale } = useI18n();
   const router = useRouter();
   const [hoveredSlug, setHoveredSlug] = useState<string | null>(null);
-  const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null);
 
   const handleClick = useCallback(
     (slug: string) => {
@@ -31,28 +30,6 @@ export function WalesMap({ countyCounts = {} }: WalesMapProps) {
 
   return (
     <div className="relative w-full max-w-lg mx-auto">
-      {/* Tooltip */}
-      {hoveredSlug && (
-        <div
-          className="pointer-events-none absolute z-10 rounded-lg bg-primary-dark px-3 py-2 text-sm text-white shadow-modal transition-opacity"
-          style={{
-            left: `${((tooltipPos?.x || 0) / WALES_SVG_WIDTH) * 100}%`,
-            top: `${((tooltipPos?.y || 0) / WALES_SVG_HEIGHT) * 100}%`,
-            transform: "translate(-50%, -120%)",
-          }}
-        >
-          <p className="font-heading font-bold text-secondary">
-            {getCountyName(hoveredSlug)}
-          </p>
-          {countyCounts[hoveredSlug] !== undefined && countyCounts[hoveredSlug] > 0 && (
-            <p className="text-xs text-primary-light">
-              {countyCounts[hoveredSlug]} {locale === "cy" ? "cartref gofal" : "care homes"}
-            </p>
-          )}
-        </div>
-      )}
-
-      {/* SVG Map */}
       <svg
         viewBox={`0 0 ${WALES_SVG_WIDTH} ${WALES_SVG_HEIGHT}`}
         className="w-full h-auto"
@@ -73,22 +50,10 @@ export function WalesMap({ countyCounts = {} }: WalesMapProps) {
                 role="link"
                 tabIndex={0}
                 aria-label={`${getCountyName(county.slug)}${countyCounts[county.slug] ? ` — ${countyCounts[county.slug]} ${locale === "cy" ? "cartref gofal" : "care homes"}` : ""}`}
-                onMouseEnter={(e) => {
-                  setHoveredSlug(county.slug);
-                  setTooltipPos({ x: county.center[0], y: county.center[1] });
-                }}
-                onMouseLeave={() => {
-                  setHoveredSlug(null);
-                  setTooltipPos(null);
-                }}
-                onFocus={() => {
-                  setHoveredSlug(county.slug);
-                  setTooltipPos({ x: county.center[0], y: county.center[1] });
-                }}
-                onBlur={() => {
-                  setHoveredSlug(null);
-                  setTooltipPos(null);
-                }}
+                onMouseEnter={() => setHoveredSlug(county.slug)}
+                onMouseLeave={() => setHoveredSlug(null)}
+                onFocus={() => setHoveredSlug(county.slug)}
+                onBlur={() => setHoveredSlug(null)}
                 onClick={() => handleClick(county.slug)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
@@ -97,18 +62,20 @@ export function WalesMap({ countyCounts = {} }: WalesMapProps) {
                   }
                 }}
               />
-              {/* County label (visible on larger screens) */}
-              {isHovered && (
-                <text
-                  x={county.center[0]}
-                  y={county.center[1]}
-                  textAnchor="middle"
-                  dominantBaseline="central"
-                  className="pointer-events-none fill-white font-heading text-[10px] font-bold"
-                >
-                  {getCountyName(county.slug)}
-                </text>
-              )}
+              {/* Subtle inline label */}
+              <text
+                x={county.center[0]}
+                y={county.center[1]}
+                textAnchor="middle"
+                dominantBaseline="central"
+                className={`pointer-events-none font-heading font-bold transition-opacity duration-150 ${
+                  isHovered
+                    ? "fill-white text-[11px] opacity-100"
+                    : "fill-muted-plum text-[8px] opacity-60"
+                }`}
+              >
+                {getCountyName(county.slug)}
+              </text>
             </g>
           );
         })}

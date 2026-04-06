@@ -47,6 +47,27 @@ h1, h2, h3, h4 {
   color: var(--color-dusk);
 }
 
+/* Suppress browser speech/autofill/cancel UI on inputs */
+input::-webkit-contacts-auto-fill-button,
+input::-webkit-credentials-auto-fill-button {
+  display: none !important;
+}
+
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+  display: none;
+}
+
+input::-ms-clear,
+input::-ms-reveal {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 /* Focus indicators for accessibility */
 :focus-visible {
   outline: 2px solid var(--color-primary);

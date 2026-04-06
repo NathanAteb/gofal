@@ -11,10 +11,10 @@ export function LanguageToggle() {
       className="inline-flex items-center gap-1.5 rounded-full border border-blush-grey bg-ivory px-3 py-1.5 text-sm font-body font-semibold text-primary transition-colors hover:bg-primary hover:text-white"
       aria-label={locale === "cy" ? "Switch to English" : "Newid i Gymraeg"}
     >
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0">
-        <circle cx="12" cy="12" r="10" />
-        <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
-      </svg>
+      {/* Language indicator */}
+      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold leading-none" aria-hidden="true">
+        {locale === "cy" ? "EN" : "CY"}
+      </span>
       {t("nav.language")}
     </button>
   );

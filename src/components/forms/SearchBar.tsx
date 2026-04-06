@@ -42,10 +42,12 @@ export function SearchBar({ defaultValue = "", size = "md" }: SearchBarProps) {
           <path d="M21 21l-4.35-4.35" />
         </svg>
         <input
-          type="text"
+          type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t("hero.search_placeholder")}
+          autoComplete="off"
+          spellCheck={false}
           className={`w-full rounded-full border border-blush-grey bg-white pl-10 pr-4 font-body text-dusk placeholder:text-muted-plum/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${
             isLg ? "py-4 text-lg" : "py-2.5 text-sm"
           }`}
