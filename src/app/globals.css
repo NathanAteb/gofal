@@ -1,0 +1,78 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+@theme inline {
+  /* Cartref Brand Colours */
+  --color-primary: #7B5B7E;
+  --color-primary-light: #A68AAB;
+  --color-primary-dark: #4A2F4E;
+  --color-secondary: #D4806A;
+  --color-secondary-light: #F0C2B5;
+  --color-accent: #E5AD3E;
+  --color-accent-light: #F5DFA0;
+  --color-ivory: #FBF7F3;
+  --color-linen: #F0E8DF;
+  --color-dusk: #2C2430;
+  --color-muted-plum: #6B5C6B;
+  --color-blush-grey: #DDD4CE;
+
+  /* Fonts */
+  --font-heading: var(--font-poppins);
+  --font-body: var(--font-nunito);
+
+  /* Shadows */
+  --shadow-card: 0 2px 12px rgba(44, 36, 48, 0.08);
+  --shadow-modal: 0 20px 60px rgba(44, 36, 48, 0.2);
+
+  /* Border Radius */
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 9999px;
+}
+
+body {
+  background-color: var(--color-ivory);
+  color: var(--color-dusk);
+  font-family: var(--font-body), sans-serif;
+  font-size: 1.125rem;
+  line-height: 1.7;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-heading), sans-serif;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+  color: var(--color-dusk);
+}
+
+/* Focus indicators for accessibility */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Print styles */
+@media print {
+  header, footer, .print\\:hidden, nav[aria-label="Breadcrumb"] {
+    display: none !important;
+  }
+  body {
+    background: white;
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+  main {
+    min-height: auto !important;
+  }
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #666;
+  }
+  a[href^="/"]::after {
+    content: " (gofal.wales" attr(href) ")";
+  }
+}

@@ -1,0 +1,47 @@
+name: Afternoon Standup (4pm UTC)
+
+on:
+  schedule:
+    - cron: '0 16 * * 1-5'  # 4pm UTC, Monday to Friday
+  workflow_dispatch:
+
+jobs:
+  afternoon-standup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: read
+      pull-requests: read
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run afternoon standup script
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.event.repository.name }}
+          STANDUP_SLOT: pm
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          NATHAN_EMAIL: ${{ secrets.NATHAN_EMAIL }}
+        run: npx ts-node scripts/standups/run-standup.ts
+
+      - name: Commit standup files
+        run: |
+          git config --global user.email "agents@gofal.wales"
+          git config --global user.name "gofal agents"
+          git add standups/
+          git diff --staged --quiet || git commit -m "chore: afternoon standup $(date +%Y-%m-%d)"
+          git push
