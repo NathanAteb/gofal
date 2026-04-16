@@ -65,7 +65,7 @@ export default function HomePage() {
 
       {/* ── 1. HERO ── Heather→Bramble gradient */}
       <section
-        className="relative overflow-hidden py-20 text-white sm:py-28"
+        className="relative py-20 pb-28 text-white sm:py-28 sm:pb-36"
         style={{ background: "linear-gradient(135deg, #4A2F4E 0%, #7B5B7E 40%, #A68AAB 70%, #7B5B7E 100%)" }}
       >
         <div className="absolute inset-0 overflow-hidden">
