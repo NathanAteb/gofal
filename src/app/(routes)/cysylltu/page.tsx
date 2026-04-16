@@ -52,7 +52,7 @@ export default function ContactPage() {
       {status === "success" ? (
         <div className="mt-8 rounded-[16px] border border-blush-grey bg-white p-8 text-center">
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="green" strokeWidth="2">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-green-600">
               <path d="M20 6L9 17l-5-5" />
             </svg>
           </div>

@@ -93,7 +93,7 @@ function Assessment() {
     return (
       <div className="mx-auto max-w-xl px-4 py-16 text-center">
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="green" strokeWidth="2"><path d="M20 6L9 17l-5-5" /></svg>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-green-600"><path d="M20 6L9 17l-5-5" /></svg>
         </div>
         <h2 className="font-heading text-2xl font-bold">Diolch! / Thank you!</h2>
         <p className="mt-3 text-muted-plum">
