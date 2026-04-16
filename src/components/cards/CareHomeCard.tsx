@@ -105,8 +105,8 @@ export function CareHomeCard({ home }: CareHomeCardProps) {
               loading="lazy"
             />
           ) : (
-            <div className="flex h-full min-h-[280px] items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">
-              <span className="font-heading text-5xl font-bold text-primary/20">{getInitials(home.name)}</span>
+            <div className="flex h-full min-h-[280px] items-center justify-center bg-gradient-to-br from-[#F7F3F8] to-[#F0EBF0]">
+              <span className="font-heading text-5xl font-bold text-[#1A1A1A]/25">{getInitials(home.name)}</span>
             </div>
           )}
           {/* Rooms available badge */}
@@ -170,8 +170,8 @@ export function CareHomeCard({ home }: CareHomeCardProps) {
                     const label = CARE_TYPE_LABELS[type];
                     return (
                       <span key={type} className="inline-flex items-center gap-1.5 text-sm text-dusk">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="flex-shrink-0">
-                          <circle cx="12" cy="12" r="10" fill="#22c55e" />
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="flex-shrink-0 text-green-500">
+                          <circle cx="12" cy="12" r="10" fill="currentColor" />
                           <path d="M8 12l3 3 5-5" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                         {label ? label[locale] : type}
@@ -229,8 +229,8 @@ export function CareHomeCard({ home }: CareHomeCardProps) {
           {photoUrl ? (
             <img src={photoUrl} alt={name} className="h-full w-full object-cover" loading="lazy" />
           ) : (
-            <div className="flex h-full items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">
-              <span className="font-heading text-4xl font-bold text-primary/20">{getInitials(home.name)}</span>
+            <div className="flex h-full items-center justify-center bg-gradient-to-br from-[#F7F3F8] to-[#F0EBF0]">
+              <span className="font-heading text-4xl font-bold text-[#1A1A1A]/25">{getInitials(home.name)}</span>
             </div>
           )}
           {home.bed_count != null && home.bed_count > 0 && (
@@ -286,8 +286,8 @@ export function CareHomeCard({ home }: CareHomeCardProps) {
               const label = CARE_TYPE_LABELS[type];
               return (
                 <span key={type} className="inline-flex items-center gap-1 text-xs text-dusk">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="flex-shrink-0">
-                    <circle cx="12" cy="12" r="10" fill="#22c55e" />
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="flex-shrink-0 text-green-500">
+                    <circle cx="12" cy="12" r="10" fill="currentColor" />
                     <path d="M8 12l3 3 5-5" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                   {label ? label[locale] : type}
