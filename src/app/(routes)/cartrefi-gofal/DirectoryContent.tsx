@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { AnimatePresence } from "motion/react";
+import * as m from "motion/react-client";
 import { useI18n } from "@/lib/i18n/context";
 import { SearchBar } from "@/components/forms/SearchBar";
 import { FilterPanel } from "@/components/forms/FilterPanel";
@@ -9,6 +11,19 @@ import { CareHomeCard } from "@/components/cards/CareHomeCard";
 import { SkeletonGrid } from "@/components/ui/SkeletonCard";
 import { counties } from "@/lib/utils/counties";
 import type { CareHomeWithProfile, SearchFilters } from "@/types/database";
+
+const WELSH_PROVERBS = [
+  { cy: "Cenedl heb iaith, cenedl heb galon.", en: "A nation without a language is a nation without a heart." },
+  { cy: "Gorau adnabod, d'adnabod dy hun.", en: "The best knowledge is to know yourself." },
+  { cy: "Hir yw pob ymaros.", en: "Long is every waiting." },
+  { cy: "A fo ben, bid bont.", en: "He who would be a leader, let him be a bridge." },
+  { cy: "Gwell dysg na golud.", en: "Learning is better than riches." },
+  { cy: "Dyfal donc a dyr y garreg.", en: "Persistent tapping breaks the stone." },
+  { cy: "Nid aur yw popeth melyn.", en: "Not everything yellow is gold." },
+  { cy: "Gorau tarian, tarian dysg.", en: "The best shield is the shield of learning." },
+  { cy: "Hen wlad fy nhadau.", en: "Land of my fathers." },
+  { cy: "Tŷ a adeiladir ar gariad, fe saif am byth.", en: "A house built on love will stand forever." },
+];
 
 interface DirectoryContentProps {
   initialHomes?: CareHomeWithProfile[];
@@ -24,6 +39,15 @@ export function DirectoryContent({
   const searchParams = useSearchParams();
   const isFirstRender = useRef(true);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [proverbIndex, setProverbIndex] = useState(0);
+
+  // Rotate proverbs every 6 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setProverbIndex((prev) => (prev + 1) % WELSH_PROVERBS.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, []);
 
   const [homes, setHomes] = useState<CareHomeWithProfile[]>(initialHomes as CareHomeWithProfile[]);
   const [total, setTotal] = useState(initialTotal);
@@ -95,12 +119,48 @@ export function DirectoryContent({
 
   const currentPage = filters.page || 1;
 
+  const proverb = WELSH_PROVERBS[proverbIndex];
+
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-      {/* Search bar — full width at top */}
-      <div className="max-w-3xl">
-        <SearchBar defaultValue={filters.query} size="lg" />
+    <div>
+      {/* Hero with rotating Welsh proverbs + search */}
+      <div
+        className="relative py-12 pb-20 sm:py-16 sm:pb-24 text-white"
+        style={{ background: "linear-gradient(135deg, #4A2F4E 0%, #7B5B7E 40%, #A68AAB 70%, #7B5B7E 100%)" }}
+      >
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-white/5" />
+          <div className="absolute -bottom-32 -left-32 h-[500px] w-[500px] rounded-full bg-white/5" />
+        </div>
+        <div className="relative mx-auto max-w-3xl px-4 text-center sm:px-6">
+          {/* Rotating proverb */}
+          <div className="h-24 sm:h-28 flex items-center justify-center">
+            <AnimatePresence mode="wait">
+              <m.div
+                key={proverbIndex}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.6 }}
+                className="text-center"
+              >
+                <p className="font-heading text-2xl font-bold text-white italic sm:text-3xl lg:text-4xl" style={{ color: "white" }}>
+                  &ldquo;{proverb.cy}&rdquo;
+                </p>
+                <p className="mt-2 text-sm font-body text-white/60">
+                  {proverb.en}
+                </p>
+              </m.div>
+            </AnimatePresence>
+          </div>
+          {/* Search bar */}
+          <div className="mt-8 mx-auto max-w-2xl">
+            <SearchBar defaultValue={filters.query} size="lg" />
+          </div>
+        </div>
       </div>
+
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
 
       {/* Count + Sort header */}
       <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
@@ -245,6 +305,7 @@ export function DirectoryContent({
           )}
         </div>
       </div>
+    </div>
     </div>
   );
 }
