@@ -167,7 +167,7 @@ export default function HomePage() {
                 <h3 className="mt-4 font-heading text-xl font-bold">
                   <WelshWord en={item.title_en}>{item.title}</WelshWord>
                 </h3>
-                <p className="mx-auto mt-2 max-w-[240px] text-[15px] leading-[1.65]" style={{ color: "#4A3D4A" }}>{item.desc}</p>
+                <p className="mx-auto mt-2 max-w-[240px] text-[15px] leading-[1.65] text-muted-plum">{item.desc}</p>
               </m.div>
             ))}
           </m.div>
