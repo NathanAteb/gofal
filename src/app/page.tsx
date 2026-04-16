@@ -73,7 +73,7 @@ export default function HomePage() {
           <m.div className="absolute -bottom-32 -left-32 h-[500px] w-[500px] rounded-full bg-white/5" animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }} />
         </div>
         <m.div className="relative mx-auto max-w-4xl px-4 text-center sm:px-6" initial="hidden" animate="visible" variants={staggerChildren}>
-          <m.h1 className="font-heading text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl" variants={fadeUp} transition={{ duration: 0.7 }}>
+          <m.h1 className="font-heading text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl" variants={fadeUp} transition={{ duration: 0.7 }}>
             {t("hero.title")}
           </m.h1>
           <m.p

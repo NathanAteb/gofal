@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useI18n } from "@/lib/i18n/context";
+import { getCountyBySlug } from "@/lib/utils/counties";
 
 interface SearchBarProps {
   defaultValue?: string;
@@ -51,7 +52,7 @@ export function SearchBar({ defaultValue = "", size = "md" }: SearchBarProps) {
           towns.push({
             type: "town",
             label: town,
-            sublabel: h.county ? `${h.county}, Wales` : "Wales",
+            sublabel: h.county ? `${(() => { const c = getCountyBySlug(h.county); return c ? (locale === "cy" ? c.name_cy : c.name_en) : h.county; })()}, ${locale === "cy" ? "Cymru" : "Wales"}` : (locale === "cy" ? "Cymru" : "Wales"),
           });
           if (towns.length >= 3) break;
         }

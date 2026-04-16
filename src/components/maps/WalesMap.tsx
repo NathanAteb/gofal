@@ -53,7 +53,7 @@ export function WalesMap({ countyCounts = {} }: WalesMapProps) {
                 handleClick(county.slug);
               }
             }}
-            className="cursor-pointer"
+            className="cursor-pointer outline-none focus:outline-none"
             role="link"
             tabIndex={0}
             aria-label={`${getCountyName(county.slug)}${countyCounts[county.slug] ? ` — ${countyCounts[county.slug]} ${locale === "cy" ? "cartref gofal" : "care homes"}` : ""}`}
