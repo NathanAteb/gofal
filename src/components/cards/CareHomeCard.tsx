@@ -4,23 +4,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useI18n } from "@/lib/i18n/context";
 import { ActiveOfferBadge } from "@/components/ui/ActiveOfferBadge";
-import { CiwRatingBadge } from "@/components/ui/CiwRatingBadge";
 import { formatPhoneForTel } from "@/lib/utils/format";
 import type { CareHome, CareHomeProfile } from "@/types/database";
 
 interface CareHomeCardProps {
   home: CareHome & { care_home_profiles?: CareHomeProfile | null };
-}
-
-const RATING_ORDER = ["excellent", "good", "adequate", "poor"] as const;
-
-function getLowestRating(ratings: (string | null)[]): string | null {
-  const valid = ratings.filter(Boolean).map((r) => r!.toLowerCase());
-  if (valid.length === 0) return null;
-  for (const level of [...RATING_ORDER].reverse()) {
-    if (valid.includes(level)) return level;
-  }
-  return valid[0];
 }
 
 function getInitials(name: string): string {
@@ -38,12 +26,26 @@ function getRatingDotColor(rating: string | null): string {
   }
 }
 
-const SERVICE_TYPE_MAP: Record<string, { cy: string; en: string }> = {
-  residential: { cy: "Preswyl", en: "Residential" },
-  nursing: { cy: "Nyrsio", en: "Nursing" },
-  dementia: { cy: "Dementia", en: "Dementia" },
-  respite: { cy: "Seibiant", en: "Respite" },
-  "learning disability": { cy: "Anabledd dysgu", en: "Learning disability" },
+function getLowestRating(ratings: (string | null)[]): string | null {
+  const order = ["Poor", "Adequate", "Good", "Excellent"];
+  let lowest: string | null = null;
+  let lowestIdx = Infinity;
+  for (const r of ratings) {
+    if (!r) continue;
+    const idx = order.indexOf(r);
+    if (idx !== -1 && idx < lowestIdx) {
+      lowestIdx = idx;
+      lowest = r;
+    }
+  }
+  return lowest;
+}
+
+const RATING_LABELS: Record<string, { cy: string; en: string }> = {
+  Excellent: { cy: "Rhagorol", en: "Excellent" },
+  Good: { cy: "Da", en: "Good" },
+  Adequate: { cy: "Digonol", en: "Adequate" },
+  Poor: { cy: "Gwael", en: "Poor" },
 };
 
 const CARE_TYPE_LABELS: Record<string, { cy: string; en: string }> = {
@@ -61,37 +63,29 @@ export function CareHomeCard({ home }: CareHomeCardProps) {
   const name = (locale === "cy" && home.name_cy) ? home.name_cy : home.name;
   const profile = home.care_home_profiles;
   const photoUrl = profile?.photos?.[0] || null;
+  const address = [home.address_line_1, home.town, home.postcode].filter(Boolean).join(", ");
 
-  const allRatings = [
+  const overallRating = getLowestRating([
     home.ciw_rating_wellbeing,
     home.ciw_rating_care_support,
     home.ciw_rating_leadership,
     home.ciw_rating_environment,
-  ];
-  const overallRating = getLowestRating(allRatings);
+  ]);
 
-  const serviceLabel = SERVICE_TYPE_MAP[home.service_type?.toLowerCase() || ""]
-    || { cy: home.service_type, en: home.service_type };
-
-  // Build care types from profile services
   const careTypes = (profile?.services || [home.service_type])
     .filter((s) => s && CARE_TYPE_LABELS[s])
     .slice(0, 4);
 
-  const address = [home.address_line_1, home.town, home.postcode].filter(Boolean).join(", ");
-
-  function handleEnquireClick(e: React.MouseEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-    router.push(`/cartrefi-gofal/${home.slug}#enquiry`);
-  }
-
   function handleCallClick(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
-    if (home.phone) {
-      window.location.href = `tel:${formatPhoneForTel(home.phone)}`;
-    }
+    if (home.phone) window.location.href = `tel:${formatPhoneForTel(home.phone)}`;
+  }
+
+  function handleViewPricing(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    router.push(`/cartrefi-gofal/${home.slug}#pricing`);
   }
 
   return (
@@ -99,10 +93,10 @@ export function CareHomeCard({ home }: CareHomeCardProps) {
       href={`/cartrefi-gofal/${home.slug}`}
       className="group block overflow-hidden rounded-[16px] border border-blush-grey bg-white shadow-card transition-all duration-200 hover:shadow-modal hover:-translate-y-0.5"
     >
-      {/* ═══ DESKTOP: Lottie-style horizontal ═══ */}
+      {/* ═══ DESKTOP ═══ */}
       <div className="hidden md:flex">
-        {/* Photo area — ~40% width */}
-        <div className="relative w-[280px] shrink-0 overflow-hidden bg-linen">
+        {/* Photo — ~45% width, full card height */}
+        <div className="relative w-[45%] shrink-0 overflow-hidden bg-linen">
           {photoUrl ? (
             <img
               src={photoUrl}
@@ -111,75 +105,74 @@ export function CareHomeCard({ home }: CareHomeCardProps) {
               loading="lazy"
             />
           ) : (
-            <div
-              className="flex h-full min-h-[240px] items-center justify-center"
-              style={{ background: "linear-gradient(135deg, #7B5B7E22, #D4806A22)" }}
-            >
-              <span className="font-heading text-4xl font-bold text-primary/30">{getInitials(home.name)}</span>
+            <div className="flex h-full min-h-[280px] items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">
+              <span className="font-heading text-5xl font-bold text-primary/20">{getInitials(home.name)}</span>
             </div>
           )}
           {/* Rooms available badge */}
           {home.bed_count != null && home.bed_count > 0 && (
-            <span className="absolute left-3 top-3 rounded-full bg-green-600 px-3 py-1 text-xs font-bold text-white shadow-sm">
+            <span className="absolute left-3 top-3 rounded-full bg-green-500 px-3.5 py-1.5 text-sm font-bold text-white shadow-sm">
               {locale === "cy" ? "Ystafelloedd ar gael" : "Rooms Available"}
             </span>
           )}
         </div>
 
-        {/* Content area */}
-        <div className="flex flex-1 flex-col justify-between p-5">
-          {/* Top section */}
-          <div>
-            {/* Name + operator */}
+        {/* Content — 3 stacked zones */}
+        <div className="flex flex-1 flex-col">
+
+          {/* Zone 1: Name, address, CIW rating, operator */}
+          <div className="flex-1 p-5 pb-4">
             <div className="flex items-start justify-between gap-3">
-              <div className="flex-1">
+              <div>
                 <h3 className="font-heading text-xl font-bold text-dusk leading-tight group-hover:text-primary transition-colors">
                   {name}
                 </h3>
-                <p className="mt-1 text-sm text-muted-plum">{address}</p>
+                <p className="mt-1.5 text-sm text-muted-plum">{address}</p>
+                {/* CIW rating inline */}
+                <div className="mt-2 flex items-center gap-2">
+                  {overallRating && (
+                    <>
+                      <span className={`inline-block h-3 w-3 rounded-full ring-2 ring-white ${getRatingDotColor(overallRating)}`} />
+                      <span className="text-sm text-dusk">
+                        <span className="font-bold">CIW {locale === "cy" ? "Gradd" : "Rating"}</span>{" "}
+                        {RATING_LABELS[overallRating]?.[locale] || overallRating}
+                      </span>
+                    </>
+                  )}
+                  {home.active_offer_level > 0 && (
+                    <span className="ml-1">
+                      <ActiveOfferBadge level={home.active_offer_level} size="sm" />
+                    </span>
+                  )}
+                </div>
               </div>
+              {/* Operator badge (like Lottie's logo) */}
               {home.operator_name && (
-                <span className="shrink-0 rounded-[8px] bg-linen px-2.5 py-1.5 text-[11px] font-semibold text-muted-plum">
-                  {home.operator_name.length > 20 ? home.operator_name.slice(0, 18) + "..." : home.operator_name}
-                </span>
-              )}
-            </div>
-
-            {/* CIW rating + Active Offer */}
-            <div className="mt-3 flex flex-wrap items-center gap-3">
-              {overallRating && (
-                <div className="flex items-center gap-1.5">
-                  <span className={`inline-block h-2.5 w-2.5 rounded-full ${getRatingDotColor(overallRating)}`} />
-                  <span className="text-sm text-dusk">
-                    <span className="font-semibold">CIW</span>{" "}
-                    <CiwRatingBadge rating={overallRating} size="sm" />
-                  </span>
+                <div className="shrink-0 rounded-[10px] border border-blush-grey bg-ivory/60 px-3 py-2 text-center">
+                  <span className="block text-[10px] text-muted-plum leading-tight">{home.operator_name}</span>
                 </div>
               )}
-              {home.active_offer_level > 0 && (
-                <ActiveOfferBadge level={home.active_offer_level} size="sm" />
-              )}
-              {home.active_offer_level >= 2 && (
-                <span className="rounded-full bg-green-50 px-2.5 py-0.5 text-[11px] font-semibold text-green-700">
-                  {locale === "cy" ? "Gofal Cymraeg" : "Welsh care"}
-                </span>
-              )}
             </div>
+          </div>
 
-            {/* Care available + Price */}
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+          {/* Divider */}
+          <div className="mx-5 border-t border-blush-grey" />
+
+          {/* Zone 2: Care available + price */}
+          <div className="px-5 py-4">
+            <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold text-muted-plum uppercase tracking-wide mb-1.5">
+                <p className="text-sm font-bold text-dusk">
                   {locale === "cy" ? "Gofal ar gael" : "Care available"}
                 </p>
-                <div className="flex flex-wrap gap-2">
+                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1.5">
                   {careTypes.map((type) => {
                     const label = CARE_TYPE_LABELS[type];
                     return (
-                      <span key={type} className="inline-flex items-center gap-1 text-sm text-dusk">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-green-500">
-                          <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.15" />
-                          <path d="M8 12l3 3 5-5" stroke="currentColor" strokeWidth="2.5" fill="none" />
+                      <span key={type} className="inline-flex items-center gap-1.5 text-sm text-dusk">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="flex-shrink-0">
+                          <circle cx="12" cy="12" r="10" fill="#22c55e" />
+                          <path d="M8 12l3 3 5-5" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                         {label ? label[locale] : type}
                       </span>
@@ -187,11 +180,11 @@ export function CareHomeCard({ home }: CareHomeCardProps) {
                   })}
                 </div>
               </div>
-              <div className="text-right">
+              <div className="shrink-0 text-right">
                 {profile?.weekly_fee_from ? (
                   <p className="text-sm text-muted-plum">
                     {locale === "cy" ? "O" : "From"}{" "}
-                    <span className="font-heading text-xl font-bold text-dusk">
+                    <span className="font-heading text-2xl font-bold text-dusk">
                       &pound;{profile.weekly_fee_from.toLocaleString("en-GB")}
                     </span>{" "}
                     {locale === "cy" ? "yr wythnos" : "per week"}
@@ -205,22 +198,22 @@ export function CareHomeCard({ home }: CareHomeCardProps) {
             </div>
           </div>
 
-          {/* Bottom buttons */}
-          <div className="mt-4 flex gap-3 border-t border-blush-grey pt-4">
+          {/* Zone 3: CTA buttons — tinted background */}
+          <div className="flex border-t border-blush-grey bg-primary/[0.04]">
             {home.phone && (
               <button
                 onClick={handleCallClick}
-                className="flex flex-1 items-center justify-center gap-2 rounded-full border border-blush-grey bg-white px-4 py-2.5 text-sm font-semibold text-dusk transition-colors hover:bg-ivory"
+                className="flex flex-1 items-center justify-center gap-2 border-r border-blush-grey py-3.5 text-sm font-bold text-dusk transition-colors hover:bg-primary/[0.08]"
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" />
                 </svg>
                 {locale === "cy" ? "Ffonio'r cartref" : "Call home"}
               </button>
             )}
             <button
-              onClick={handleEnquireClick}
-              className="flex flex-1 items-center justify-center gap-2 rounded-full bg-secondary px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-secondary-hover"
+              onClick={handleViewPricing}
+              className="flex flex-1 items-center justify-center py-3.5 text-sm font-bold text-white bg-secondary transition-colors hover:bg-secondary-hover"
             >
               {locale === "cy" ? "Gweld prisiau" : "View pricing"}
             </button>
@@ -228,118 +221,101 @@ export function CareHomeCard({ home }: CareHomeCardProps) {
         </div>
       </div>
 
-      {/* ═══ MOBILE: Lottie-style vertical ═══ */}
+      {/* ═══ MOBILE ═══ */}
       <div className="md:hidden">
         {/* Photo */}
-        <div className="relative h-[200px] overflow-hidden bg-linen">
+        <div className="relative h-[220px] overflow-hidden bg-linen">
           {photoUrl ? (
-            <img
-              src={photoUrl}
-              alt={name}
-              className="h-full w-full object-cover"
-              loading="lazy"
-            />
+            <img src={photoUrl} alt={name} className="h-full w-full object-cover" loading="lazy" />
           ) : (
-            <div
-              className="flex h-full items-center justify-center"
-              style={{ background: "linear-gradient(135deg, #7B5B7E22, #D4806A22)" }}
-            >
-              <span className="font-heading text-4xl font-bold text-primary/30">{getInitials(home.name)}</span>
+            <div className="flex h-full items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">
+              <span className="font-heading text-4xl font-bold text-primary/20">{getInitials(home.name)}</span>
             </div>
           )}
           {home.bed_count != null && home.bed_count > 0 && (
-            <span className="absolute left-3 top-3 rounded-full bg-green-600 px-3 py-1 text-xs font-bold text-white shadow-sm">
+            <span className="absolute left-3 top-3 rounded-full bg-green-500 px-3 py-1 text-xs font-bold text-white shadow-sm">
               {locale === "cy" ? "Ystafelloedd ar gael" : "Rooms Available"}
             </span>
           )}
-          {home.active_offer_level > 0 && (
-            <div className="absolute right-3 top-3">
-              <ActiveOfferBadge level={home.active_offer_level} size="sm" />
-            </div>
-          )}
         </div>
 
-        {/* Content */}
-        <div className="p-4">
+        {/* Zone 1: Name, address, rating */}
+        <div className="p-4 pb-3">
           <h3 className="font-heading text-lg font-bold text-dusk leading-tight group-hover:text-primary transition-colors">
             {name}
           </h3>
           <p className="mt-1 text-sm text-muted-plum">{address}</p>
-
-          {/* CIW + Welsh badge */}
           <div className="mt-2 flex flex-wrap items-center gap-2">
             {overallRating && (
               <div className="flex items-center gap-1.5">
-                <span className={`inline-block h-2 w-2 rounded-full ${getRatingDotColor(overallRating)}`} />
-                <span className="text-sm font-semibold text-dusk">CIW</span>
-                <CiwRatingBadge rating={overallRating} size="sm" />
+                <span className={`inline-block h-2.5 w-2.5 rounded-full ${getRatingDotColor(overallRating)}`} />
+                <span className="text-sm text-dusk">
+                  <span className="font-bold">CIW</span> {RATING_LABELS[overallRating]?.[locale] || overallRating}
+                </span>
               </div>
             )}
-            {home.active_offer_level >= 2 && (
-              <span className="rounded-full bg-green-50 px-2 py-0.5 text-[11px] font-semibold text-green-700">
-                {locale === "cy" ? "Gofal Cymraeg" : "Welsh care"}
-              </span>
+            {home.active_offer_level > 0 && (
+              <ActiveOfferBadge level={home.active_offer_level} size="sm" />
             )}
           </div>
+        </div>
 
-          {/* Care types */}
-          <div className="mt-3">
-            <p className="text-[11px] font-semibold text-muted-plum uppercase tracking-wide mb-1">
-              {locale === "cy" ? "Gofal ar gael" : "Care available"}
-            </p>
-            <div className="flex flex-wrap gap-1.5">
-              {careTypes.map((type) => {
-                const label = CARE_TYPE_LABELS[type];
-                return (
-                  <span key={type} className="inline-flex items-center gap-1 text-xs text-dusk">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-green-500">
-                      <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.15" />
-                      <path d="M8 12l3 3 5-5" stroke="currentColor" strokeWidth="2.5" fill="none" />
-                    </svg>
-                    {label ? label[locale] : type}
-                  </span>
-                );
-              })}
+        {/* Divider */}
+        <div className="mx-4 border-t border-blush-grey" />
+
+        {/* Zone 2: Care types + price */}
+        <div className="px-4 py-3">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-bold text-dusk mb-1.5">
+                {locale === "cy" ? "Gofal ar gael" : "Care available"}
+              </p>
+              <div className="flex flex-wrap gap-x-3 gap-y-1">
+                {careTypes.map((type) => {
+                  const label = CARE_TYPE_LABELS[type];
+                  return (
+                    <span key={type} className="inline-flex items-center gap-1 text-xs text-dusk">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="flex-shrink-0">
+                        <circle cx="12" cy="12" r="10" fill="#22c55e" />
+                        <path d="M8 12l3 3 5-5" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      {label ? label[locale] : type}
+                    </span>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-
-          {/* Price */}
-          <div className="mt-3">
-            {profile?.weekly_fee_from ? (
-              <p className="text-sm text-muted-plum">
+            {profile?.weekly_fee_from && (
+              <p className="shrink-0 text-right text-xs text-muted-plum">
                 {locale === "cy" ? "O" : "From"}{" "}
-                <span className="font-heading text-lg font-bold text-dusk">
+                <span className="font-heading text-lg font-bold text-dusk block">
                   &pound;{profile.weekly_fee_from.toLocaleString("en-GB")}
-                </span>{" "}
+                </span>
                 {locale === "cy" ? "yr wythnos" : "per week"}
               </p>
-            ) : (
-              <p className="text-sm text-muted-plum italic">
-                {locale === "cy" ? "Cysylltwch am bris" : "Contact for price"}
-              </p>
             )}
           </div>
+        </div>
 
-          {/* Buttons */}
-          <div className="mt-3 flex gap-2">
-            {home.phone && (
-              <button
-                onClick={handleCallClick}
-                className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-blush-grey bg-white px-3 py-2.5 text-sm font-semibold text-dusk"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" />
-                </svg>
-                {locale === "cy" ? "Ffonio" : "Call"}
-              </button>
-            )}
+        {/* Zone 3: Buttons */}
+        <div className="flex border-t border-blush-grey bg-primary/[0.04]">
+          {home.phone && (
             <button
-              onClick={handleEnquireClick}
-              className="flex flex-1 items-center justify-center rounded-full bg-secondary px-3 py-2.5 text-sm font-bold text-white"
+              onClick={handleCallClick}
+              className="flex flex-1 items-center justify-center gap-1.5 border-r border-blush-grey py-3 text-sm font-bold text-dusk"
             >
-              {locale === "cy" ? "Gweld prisiau" : "View pricing"}
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" />
+              </svg>
+              {locale === "cy" ? "Ffonio" : "Call"}
             </button>
-          </div>
+          )}
+          <button
+            onClick={handleViewPricing}
+            className="flex flex-1 items-center justify-center py-3 text-sm font-bold text-white bg-secondary"
+          >
+            {locale === "cy" ? "Gweld prisiau" : "View pricing"}
+          </button>
         </div>
       </div>
     </Link>
