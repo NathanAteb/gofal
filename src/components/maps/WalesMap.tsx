@@ -60,8 +60,8 @@ export function WalesMap({ countyCounts = {} }: WalesMapProps) {
           >
             <path
               d={county.path}
-              fill={isHovered ? "#7B5B7E" : "#FBF7F3"}
-              stroke="#DDD4CE"
+              fill={isHovered ? "#7B5B7E" : "#FFFFFF"}
+              stroke="#E5E7EB"
               strokeWidth={1}
               className="transition-colors duration-150"
             />
@@ -71,7 +71,7 @@ export function WalesMap({ countyCounts = {} }: WalesMapProps) {
               textAnchor="middle"
               dominantBaseline="central"
               className="pointer-events-none select-none hidden sm:block"
-              fill={isHovered ? "#FFFFFF" : "#2C2430"}
+              fill={isHovered ? "#FFFFFF" : "#1A1A1A"}
               fontSize={isHovered ? 11 : 9}
               fontWeight={isHovered ? 700 : 600}
               fontFamily="var(--font-nunito), sans-serif"
