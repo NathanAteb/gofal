@@ -45,7 +45,7 @@ export function DirectoryContent({
   useEffect(() => {
     const interval = setInterval(() => {
       setProverbIndex((prev) => (prev + 1) % WELSH_PROVERBS.length);
-    }, 6000);
+    }, 12000);
     return () => clearInterval(interval);
   }, []);
 
