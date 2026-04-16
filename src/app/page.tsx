@@ -298,7 +298,7 @@ export default function HomePage() {
         </p>
       </div>
 
-      {/* ── 6. BROWSE BY COUNTY ── County pill links (replaces old map section) */}
+      {/* ── 6. BROWSE BY COUNTY ── Map + pill links */}
       <section className="bg-white py-16 sm:py-24">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <m.h2 className="text-center font-heading text-3xl font-bold sm:text-4xl" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} transition={{ duration: 0.6 }}>
@@ -311,7 +311,18 @@ export default function HomePage() {
               ? "Dewiswch sir i weld cartrefi gofal yn yr ardal"
               : "Select a county to see care homes in the area"}
           </m.p>
-          <m.div className="mt-8 flex flex-wrap justify-center gap-3" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerChildren}>
+          {/* Interactive map — large, desktop only */}
+          <m.div
+            className="mt-10 hidden sm:block mx-auto max-w-2xl"
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+          >
+            <WalesMap countyCounts={countyCounts} />
+          </m.div>
+          {/* County pill links — always visible, primary nav on mobile */}
+          <m.div className="mt-10 flex flex-wrap justify-center gap-3" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerChildren}>
             {counties.map((county) => (
               <m.div key={county.slug} variants={fadeUp} transition={{ duration: 0.3 }}>
                 <Link
@@ -320,7 +331,7 @@ export default function HomePage() {
                 >
                   {locale === "cy" ? county.name_cy : county.name_en}
                   {countyCounts[county.slug] > 0 && (
-                    <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold text-primary group-hover:bg-white/20 group-hover:text-white">
+                    <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold text-primary">
                       {countyCounts[county.slug]}
                     </span>
                   )}
