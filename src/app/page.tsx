@@ -2,8 +2,17 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { AnimatePresence } from "motion/react";
 import * as m from "motion/react-client";
 import { useI18n } from "@/lib/i18n/context";
+
+const HERO_TAGLINES = [
+  "Cartref yw cartref.",
+  "Cymorth i bawb.",
+  "Gyda'n gilydd.",
+  "Mae gofal yn iawn.",
+  "Lle mae'r galon.",
+];
 import { SearchBar } from "@/components/forms/SearchBar";
 import { WalesMap } from "@/components/maps/WalesMap";
 import { WelshWord } from "@/components/ui/WelshWord";
@@ -28,6 +37,14 @@ const staggerChildren = {
 export default function HomePage() {
   const { locale, t } = useI18n();
   const [countyCounts, setCountyCounts] = useState<Record<string, number>>({});
+  const [taglineIndex, setTaglineIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTaglineIndex((prev) => (prev + 1) % HERO_TAGLINES.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     counties.forEach((c) => {
@@ -78,6 +95,22 @@ export default function HomePage() {
 
             {/* Left column: text + search */}
             <m.div initial="hidden" animate="visible" variants={staggerChildren}>
+              {/* Rotating Welsh tagline */}
+              <div className="h-7 mb-3">
+                <AnimatePresence mode="wait">
+                  <m.p
+                    key={taglineIndex}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.5 }}
+                    className="text-[14px] italic text-white/50 tracking-wide"
+                    style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
+                  >
+                    {HERO_TAGLINES[taglineIndex]}
+                  </m.p>
+                </AnimatePresence>
+              </div>
               <m.h1 className="font-heading text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl" variants={fadeUp} transition={{ duration: 0.7 }}>
                 {t("hero.title")}
               </m.h1>
