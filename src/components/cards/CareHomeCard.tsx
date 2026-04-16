@@ -180,14 +180,15 @@ export function CareHomeCard({ home }: CareHomeCardProps) {
                   })}
                 </div>
               </div>
-              <div className="shrink-0 text-right">
+              <div className="shrink-0 text-right whitespace-nowrap">
                 {profile?.weekly_fee_from ? (
                   <p className="text-sm text-muted-plum">
                     {locale === "cy" ? "O" : "From"}{" "}
                     <span className="font-heading text-2xl font-bold text-dusk">
                       &pound;{profile.weekly_fee_from.toLocaleString("en-GB")}
-                    </span>{" "}
-                    {locale === "cy" ? "yr wythnos" : "per week"}
+                    </span>
+                    <br />
+                    <span className="text-xs">{locale === "cy" ? "yr wythnos" : "per week"}</span>
                   </p>
                 ) : (
                   <p className="text-sm text-muted-plum italic">
@@ -265,35 +266,34 @@ export function CareHomeCard({ home }: CareHomeCardProps) {
 
         {/* Zone 2: Care types + price */}
         <div className="px-4 py-3">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-xs font-bold text-dusk mb-1.5">
-                {locale === "cy" ? "Gofal ar gael" : "Care available"}
-              </p>
-              <div className="flex flex-wrap gap-x-3 gap-y-1">
-                {careTypes.map((type) => {
-                  const label = CARE_TYPE_LABELS[type];
-                  return (
-                    <span key={type} className="inline-flex items-center gap-1 text-xs text-dusk">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="flex-shrink-0">
-                        <circle cx="12" cy="12" r="10" fill="#22c55e" />
-                        <path d="M8 12l3 3 5-5" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                      {label ? label[locale] : type}
-                    </span>
-                  );
-                })}
-              </div>
-            </div>
+          <div className="flex items-baseline justify-between gap-2">
+            <p className="text-xs font-bold text-dusk">
+              {locale === "cy" ? "Gofal ar gael" : "Care available"}
+            </p>
             {profile?.weekly_fee_from && (
-              <p className="shrink-0 text-right text-xs text-muted-plum">
+              <p className="text-xs text-muted-plum whitespace-nowrap">
                 {locale === "cy" ? "O" : "From"}{" "}
-                <span className="font-heading text-lg font-bold text-dusk block">
+                <span className="font-heading text-lg font-bold text-dusk">
                   &pound;{profile.weekly_fee_from.toLocaleString("en-GB")}
-                </span>
-                {locale === "cy" ? "yr wythnos" : "per week"}
+                </span>{" "}
+                <span className="hidden min-[400px]:inline">{locale === "cy" ? "yr wythnos" : "per week"}</span>
+                <span className="min-[400px]:hidden">{locale === "cy" ? "/wythnos" : "/wk"}</span>
               </p>
             )}
+          </div>
+          <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1">
+            {careTypes.map((type) => {
+              const label = CARE_TYPE_LABELS[type];
+              return (
+                <span key={type} className="inline-flex items-center gap-1 text-xs text-dusk">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="flex-shrink-0">
+                    <circle cx="12" cy="12" r="10" fill="#22c55e" />
+                    <path d="M8 12l3 3 5-5" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  {label ? label[locale] : type}
+                </span>
+              );
+            })}
           </div>
         </div>
 
