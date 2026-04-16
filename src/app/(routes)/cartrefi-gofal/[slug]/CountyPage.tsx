@@ -62,19 +62,38 @@ export function CountyPage({ county }: Props) {
   return (
     <div>
       {/* County header */}
-      <div className="relative h-48 sm:h-64 bg-primary-dark overflow-hidden">
+      {/* County hero with search */}
+      <div className="relative bg-primary-dark overflow-hidden py-12 sm:py-16 pb-20 sm:pb-24">
         <img
           src="https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?w=1200&q=80&fm=webp&fit=crop"
           alt={`${county.name_cy} / ${county.name_en} — Cymru / Wales`}
-          className="h-full w-full object-cover opacity-60"
+          className="absolute inset-0 h-full w-full object-cover opacity-40"
           loading="eager"
         />
-        <div className="absolute inset-0 flex items-center justify-center">
+        <div className="relative mx-auto max-w-3xl px-4 text-center sm:px-6">
           <h1 className="font-heading text-3xl font-bold text-white sm:text-4xl lg:text-5xl drop-shadow-lg">
             {locale === "cy"
               ? `Cartrefi Gofal yn ${county.name_cy}`
               : `Care Homes in ${county.name_en}`}
           </h1>
+          {/* Stats pills */}
+          <div className="mt-4 flex flex-wrap justify-center gap-2">
+            <span className="rounded-full bg-white/20 px-3 py-1 text-sm font-semibold text-white">
+              {total} {locale === "cy" ? "cartref gofal" : "care homes"}
+            </span>
+            {avgFee && (
+              <span className="rounded-full bg-white/20 px-3 py-1 text-sm font-semibold text-white">
+                ~£{avgFee.toLocaleString("en-GB")} {locale === "cy" ? "/wythnos" : "/week"}
+              </span>
+            )}
+            <span className="rounded-full bg-white/20 px-3 py-1 text-sm font-semibold text-white">
+              {welshPct}% {locale === "cy" ? "Cymraeg" : "Welsh"}
+            </span>
+          </div>
+          {/* Search bar in hero */}
+          <div className="mt-6 mx-auto max-w-2xl">
+            <SearchBar size="lg" />
+          </div>
         </div>
       </div>
 
@@ -85,34 +104,6 @@ export function CountyPage({ county }: Props) {
             { label_cy: county.name_cy, label_en: county.name_en },
           ]}
         />
-
-        {/* Stats strip */}
-        <div className="mt-4 flex flex-wrap gap-3">
-          <span className="rounded-full bg-primary/10 px-3 py-1.5 text-sm font-semibold text-primary">
-            {total} {locale === "cy" ? "cartref gofal" : "care homes"}
-          </span>
-          {avgFee && (
-            <span className="rounded-full bg-secondary/10 px-3 py-1.5 text-sm font-semibold text-secondary">
-              ~£{avgFee.toLocaleString("en-GB")} {locale === "cy" ? "yr wythnos (cyfartaledd)" : "per week (average)"}
-            </span>
-          )}
-          <span className="rounded-full bg-accent/10 px-3 py-1.5 text-sm font-semibold text-accent">
-            {welshPct}% {locale === "cy" ? "Cymraeg" : "Welsh speakers"}
-          </span>
-          <a
-            href="https://www.careinspectorate.wales/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-full bg-linen px-3 py-1.5 text-sm font-semibold text-muted-plum hover:text-primary transition-colors"
-          >
-            {locale === "cy" ? "Data CIW" : "CIW Data"} &rarr;
-          </a>
-        </div>
-
-        {/* Search bar */}
-        <div className="mt-6 max-w-2xl">
-          <SearchBar />
-        </div>
 
         {/* Count + Sort header */}
         <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
