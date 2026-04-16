@@ -98,8 +98,8 @@ export function DirectoryContent({
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
       {/* Search bar — full width at top */}
-      <div className="max-w-2xl">
-        <SearchBar defaultValue={filters.query} />
+      <div className="max-w-3xl">
+        <SearchBar defaultValue={filters.query} size="lg" />
       </div>
 
       {/* Count + Sort header */}
