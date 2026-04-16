@@ -151,6 +151,10 @@ export function Footer() {
           </a>
         </div>
 
+        <p className="mt-6 text-center italic text-[13px]" style={{ color: "rgba(255,255,255,0.4)" }}>
+          Mae gofal yn iawn.
+        </p>
+
         <div className="mt-6 border-t border-primary-light/20 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-primary-light/60">
           <span>{t("footer.copyright")}</span>
           <LearnWelshToggle />

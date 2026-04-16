@@ -263,6 +263,9 @@ export function DirectoryContent({
                   ? "Ceisiwch chwilio am dref, sir, neu god post gwahanol. Gallwch hefyd bori yn ôl sir isod."
                   : "Try searching for a different town, county, or postcode. You can also browse by county below."}
               </p>
+              <p className="mt-3 italic text-muted-plum text-[14px]">
+                Ceisiwch sir arall, neu ehangwch eich chwiliad.
+              </p>
               <div className="mt-6 flex flex-wrap justify-center gap-2">
                 {["sir-gaerfyrddin", "gwynedd", "caerdydd", "abertawe", "ceredigion"].map((slug) => {
                   const c = counties.find((co) => co.slug === slug);
