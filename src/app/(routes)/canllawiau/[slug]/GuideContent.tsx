@@ -64,43 +64,26 @@ export function GuideContent({ guide }: Props) {
         </div>
 
         <div className="mt-8 prose prose-lg max-w-none text-muted-plum prose-headings:text-dusk prose-headings:font-heading prose-a:text-primary prose-strong:text-dusk prose-li:marker:text-primary">
-          {content.split("\n\n").map((block, i) => {
-            if (block.startsWith("## ")) {
-              return <h2 key={i} className="mt-8 mb-4 text-2xl font-bold">{block.replace("## ", "")}</h2>;
-            }
-            if (block.startsWith("### ")) {
-              return <h3 key={i} className="mt-6 mb-3 text-xl font-bold">{block.replace("### ", "")}</h3>;
-            }
-            if (block.startsWith("#### ")) {
-              return <h4 key={i} className="mt-4 mb-2 text-lg font-bold">{block.replace("#### ", "")}</h4>;
-            }
-            if (block.startsWith("- ")) {
-              const items = block.split("\n").filter(Boolean);
-              return (
-                <ul key={i} className="my-3 list-disc pl-6 space-y-1">
-                  {items.map((item, j) => (
-                    <li key={j} dangerouslySetInnerHTML={{ __html: renderInlineMarkdown(item.replace(/^- /, "")) }} />
-                  ))}
-                </ul>
-              );
-            }
-            if (block.startsWith("1. ")) {
-              const items = block.split("\n").filter(Boolean);
-              return (
-                <ol key={i} className="my-3 list-decimal pl-6 space-y-1">
-                  {items.map((item, j) => (
-                    <li key={j} dangerouslySetInnerHTML={{ __html: renderInlineMarkdown(item.replace(/^\d+\. /, "")) }} />
-                  ))}
-                </ol>
-              );
-            }
-            if (block.startsWith("---")) {
-              return <hr key={i} className="my-8 border-blush-grey" />;
-            }
-            if (block.startsWith("*") && block.endsWith("*")) {
-              return <p key={i} className="my-3 italic" dangerouslySetInnerHTML={{ __html: renderInlineMarkdown(block.slice(1, -1)) }} />;
-            }
-            return <p key={i} className="my-3 leading-relaxed" dangerouslySetInnerHTML={{ __html: renderInlineMarkdown(block) }} />;
+          {parseMarkdownBlocks(content).map((block, i) => {
+            if (block.type === "h2") return <h2 key={i} className="mt-10 mb-4 text-2xl font-bold">{block.text}</h2>;
+            if (block.type === "h3") return <h3 key={i} className="mt-8 mb-3 text-xl font-bold">{block.text}</h3>;
+            if (block.type === "h4") return <h4 key={i} className="mt-6 mb-2 text-lg font-semibold">{block.text}</h4>;
+            if (block.type === "ul") return (
+              <ul key={i} className="my-4 list-disc pl-6 space-y-2">
+                {block.items!.map((item, j) => (
+                  <li key={j} className="leading-relaxed" dangerouslySetInnerHTML={{ __html: renderInlineMarkdown(item) }} />
+                ))}
+              </ul>
+            );
+            if (block.type === "ol") return (
+              <ol key={i} className="my-4 list-decimal pl-6 space-y-2">
+                {block.items!.map((item, j) => (
+                  <li key={j} className="leading-relaxed" dangerouslySetInnerHTML={{ __html: renderInlineMarkdown(item) }} />
+                ))}
+              </ol>
+            );
+            if (block.type === "hr") return <hr key={i} className="my-10 border-blush-grey" />;
+            return <p key={i} className="my-4 leading-[1.8]" dangerouslySetInnerHTML={{ __html: renderInlineMarkdown(block.text!) }} />;
           })}
         </div>
 
@@ -148,5 +131,79 @@ export function GuideContent({ guide }: Props) {
 function renderInlineMarkdown(text: string): string {
   return text
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.+?)\*/g, "<em>$1</em>")
     .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="text-primary hover:underline">$1</a>');
+}
+
+interface Block {
+  type: "h2" | "h3" | "h4" | "p" | "ul" | "ol" | "hr";
+  text?: string;
+  items?: string[];
+}
+
+function parseMarkdownBlocks(content: string): Block[] {
+  const lines = content.split("\n");
+  const blocks: Block[] = [];
+  let i = 0;
+
+  while (i < lines.length) {
+    const line = lines[i];
+
+    // Skip empty lines
+    if (!line.trim()) { i++; continue; }
+
+    // Headings
+    if (line.startsWith("#### ")) {
+      blocks.push({ type: "h4", text: line.slice(5) });
+      i++; continue;
+    }
+    if (line.startsWith("### ")) {
+      blocks.push({ type: "h3", text: line.slice(4) });
+      i++; continue;
+    }
+    if (line.startsWith("## ")) {
+      blocks.push({ type: "h2", text: line.slice(3) });
+      i++; continue;
+    }
+
+    // Horizontal rule
+    if (line.startsWith("---")) {
+      blocks.push({ type: "hr" });
+      i++; continue;
+    }
+
+    // Unordered list — collect consecutive "- " lines
+    if (line.startsWith("- ")) {
+      const items: string[] = [];
+      while (i < lines.length && lines[i].startsWith("- ")) {
+        items.push(lines[i].slice(2));
+        i++;
+      }
+      blocks.push({ type: "ul", items });
+      continue;
+    }
+
+    // Ordered list — collect consecutive "N. " lines
+    if (/^\d+\. /.test(line)) {
+      const items: string[] = [];
+      while (i < lines.length && /^\d+\. /.test(lines[i])) {
+        items.push(lines[i].replace(/^\d+\. /, ""));
+        i++;
+      }
+      blocks.push({ type: "ol", items });
+      continue;
+    }
+
+    // Paragraph — collect consecutive non-special lines
+    const paraLines: string[] = [];
+    while (i < lines.length && lines[i].trim() && !lines[i].startsWith("#") && !lines[i].startsWith("- ") && !lines[i].startsWith("---") && !/^\d+\. /.test(lines[i])) {
+      paraLines.push(lines[i]);
+      i++;
+    }
+    if (paraLines.length > 0) {
+      blocks.push({ type: "p", text: paraLines.join(" ") });
+    }
+  }
+
+  return blocks;
 }
