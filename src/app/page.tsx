@@ -2,8 +2,17 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { AnimatePresence } from "motion/react";
 import * as m from "motion/react-client";
 import { useI18n } from "@/lib/i18n/context";
+
+const HERO_TAGLINES = [
+  "Cartref yw cartref.",
+  "Cymorth i bawb.",
+  "Gyda'n gilydd.",
+  "Mae gofal yn iawn.",
+  "Lle mae'r galon.",
+];
 import { SearchBar } from "@/components/forms/SearchBar";
 import { WalesMap } from "@/components/maps/WalesMap";
 import { WelshWord } from "@/components/ui/WelshWord";
@@ -28,6 +37,14 @@ const staggerChildren = {
 export default function HomePage() {
   const { locale, t } = useI18n();
   const [countyCounts, setCountyCounts] = useState<Record<string, number>>({});
+  const [taglineIndex, setTaglineIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTaglineIndex((prev) => (prev + 1) % HERO_TAGLINES.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     counties.forEach((c) => {
@@ -63,41 +80,88 @@ export default function HomePage() {
         }}
       />
 
-      {/* ── 1. HERO ── Heather→Bramble gradient */}
+      {/* ── 1. HERO ── Two-column: text left, map right */}
       <section
-        className="relative overflow-hidden py-20 text-white sm:py-28"
+        className="relative py-16 pb-28 text-white sm:py-20 sm:pb-36 lg:py-24 lg:pb-28"
         style={{ background: "linear-gradient(135deg, #4A2F4E 0%, #7B5B7E 40%, #A68AAB 70%, #7B5B7E 100%)" }}
       >
         <div className="absolute inset-0 overflow-hidden">
           <m.div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-white/5" animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }} />
           <m.div className="absolute -bottom-32 -left-32 h-[500px] w-[500px] rounded-full bg-white/5" animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }} />
         </div>
-        <m.div className="relative mx-auto max-w-4xl px-4 text-center sm:px-6" initial="hidden" animate="visible" variants={staggerChildren}>
-          <m.h1 className="font-heading text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl" variants={fadeUp} transition={{ duration: 0.7 }}>
-            {t("hero.title")}
-          </m.h1>
-          <m.p
-            className="mx-auto mt-4 max-w-[480px] font-body font-normal text-white/[0.92]"
-            style={{ fontSize: "20px", letterSpacing: "0.01em", lineHeight: 1.5 }}
-            variants={fadeUp}
-            transition={{ duration: 0.7 }}
-          >
-            {locale === "cy" ? "Dod o hyd i ofal Cymraeg — am ddim." : "Find Welsh-language care. Free."}
-          </m.p>
-          <m.div className="mx-auto mt-8 max-w-2xl" variants={fadeUp} transition={{ duration: 0.7 }}>
-            <SearchBar size="lg" />
-          </m.div>
-          {/* P2: Concierge CTA */}
-          <m.div className="mt-5 flex flex-col sm:flex-row items-center justify-center gap-3" variants={fadeIn} transition={{ duration: 0.5, delay: 0.6 }}>
-            <Link
-              href="/cymorth"
-              className="inline-flex items-center gap-2 rounded-full border-2 border-white/50 px-6 py-2.5 font-body font-semibold text-white transition-colors hover:bg-white hover:text-dusk"
+
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="grid items-center gap-10 lg:grid-cols-[55%_45%]">
+
+            {/* Left column: text + search */}
+            <m.div initial="hidden" animate="visible" variants={staggerChildren}>
+              {/* Rotating Welsh tagline */}
+              <div className="h-7 mb-3">
+                <AnimatePresence mode="wait">
+                  <m.p
+                    key={taglineIndex}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.5 }}
+                    className="text-[14px] italic text-white/50 tracking-wide"
+                    style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
+                  >
+                    {HERO_TAGLINES[taglineIndex]}
+                  </m.p>
+                </AnimatePresence>
+              </div>
+              <m.h1 className="font-heading text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl" variants={fadeUp} transition={{ duration: 0.7 }}>
+                {t("hero.title")}
+              </m.h1>
+              <m.p
+                className="mt-4 max-w-[480px] font-body font-normal text-white/[0.92]"
+                style={{ fontSize: "20px", letterSpacing: "0.01em", lineHeight: 1.5 }}
+                variants={fadeUp}
+                transition={{ duration: 0.7 }}
+              >
+                {locale === "cy" ? "Dod o hyd i ofal Cymraeg — am ddim." : "Find Welsh-language care. Free."}
+              </m.p>
+              <m.div className="mt-8 max-w-xl" variants={fadeUp} transition={{ duration: 0.7 }}>
+                <SearchBar size="lg" />
+              </m.div>
+              <m.div className="mt-5" variants={fadeIn} transition={{ duration: 0.5, delay: 0.6 }}>
+                <Link
+                  href="/cymorth"
+                  className="inline-flex items-center gap-2 rounded-full border-2 border-white/50 px-6 py-2.5 font-body font-semibold text-white transition-colors hover:bg-white hover:text-dusk"
+                >
+                  {locale === "cy" ? "Neu cewch gymorth gan ein tîm" : "Or get help from our team"}
+                  <span aria-hidden="true">&rarr;</span>
+                </Link>
+              </m.div>
+            </m.div>
+
+            {/* Right column: Wales map */}
+            <m.div
+              className="hidden md:flex flex-col items-center justify-center"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
             >
-              {locale === "cy" ? "Neu cewch gymorth gan ein tîm" : "Or get help from our team"}
-              <span aria-hidden="true">&rarr;</span>
-            </Link>
+              <p className="mb-4 text-center font-body text-sm font-normal text-white/70">
+                {locale === "cy" ? "Porwch yn ôl sir" : "Browse by county"}
+              </p>
+              <WalesMap countyCounts={countyCounts} variant="hero" />
+            </m.div>
+          </div>
+
+          {/* Mobile: map below text, 280px */}
+          <m.div
+            className="mt-10 md:hidden"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+          >
+            <div className="mx-auto" style={{ height: "280px" }}>
+              <WalesMap countyCounts={countyCounts} variant="hero" />
+            </div>
           </m.div>
-        </m.div>
+        </div>
       </section>
 
       {/* ── 2. STATS ── White bg */}
@@ -167,14 +231,14 @@ export default function HomePage() {
                 <h3 className="mt-4 font-heading text-xl font-bold">
                   <WelshWord en={item.title_en}>{item.title}</WelshWord>
                 </h3>
-                <p className="mx-auto mt-2 max-w-[240px] text-[15px] leading-[1.65]" style={{ color: "#4A3D4A" }}>{item.desc}</p>
+                <p className="mx-auto mt-2 max-w-[240px] text-[15px] leading-[1.65] text-muted-plum">{item.desc}</p>
               </m.div>
             ))}
           </m.div>
         </div>
       </section>
 
-      {/* ── 4. FOUNDING STORY ── Linen bg, ABOVE map (P3) */}
+      {/* ── 4. FOUNDING STORY ── Linen bg */}
       <section className="bg-linen py-16 sm:py-24 overflow-hidden">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="grid gap-10 items-center md:grid-cols-2">
@@ -185,7 +249,6 @@ export default function HomePage() {
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: 0.7 }}
             >
-              {/* Pull quote */}
               <div className="border-l-4 border-secondary pl-5 mb-6">
                 <p className="font-heading text-[18px] font-semibold text-primary sm:text-[22px] leading-snug">
                   {locale === "cy"
@@ -225,7 +288,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── 5. TRUST BANNER ── Honey stripe (P9) */}
+      {/* ── 5. TRUST BANNER ── Honey stripe */}
       <div className="bg-accent py-3">
         <p className="text-center font-heading text-sm font-semibold text-dusk sm:text-base">
           <span className="mr-2 text-secondary">✓</span>
@@ -235,7 +298,7 @@ export default function HomePage() {
         </p>
       </div>
 
-      {/* ── 6. WALES MAP ── White bg (P6) */}
+      {/* ── 6. BROWSE BY COUNTY ── Map + pill links */}
       <section className="bg-white py-16 sm:py-24">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <m.h2 className="text-center font-heading text-3xl font-bold sm:text-4xl" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} transition={{ duration: 0.6 }}>
@@ -245,11 +308,12 @@ export default function HomePage() {
           </m.h2>
           <m.p className="mt-3 text-center text-muted-plum" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} transition={{ duration: 0.5, delay: 0.2 }}>
             {locale === "cy"
-              ? "Cliciwch ar sir i weld cartrefi gofal yn yr ardal"
-              : "Click a county to see care homes in the area"}
+              ? "Dewiswch sir i weld cartrefi gofal yn yr ardal"
+              : "Select a county to see care homes in the area"}
           </m.p>
+          {/* Interactive map — large, desktop only */}
           <m.div
-            className="mt-10 hidden sm:block"
+            className="mt-10 hidden sm:block mx-auto max-w-2xl"
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
@@ -257,16 +321,19 @@ export default function HomePage() {
           >
             <WalesMap countyCounts={countyCounts} />
           </m.div>
-          <m.div className="mt-8 grid grid-cols-2 gap-2 sm:hidden" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerChildren}>
+          {/* County pill links — always visible, primary nav on mobile */}
+          <m.div className="mt-10 flex flex-wrap justify-center gap-3" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerChildren}>
             {counties.map((county) => (
-              <m.div key={county.slug} variants={fadeUp} transition={{ duration: 0.4 }}>
+              <m.div key={county.slug} variants={fadeUp} transition={{ duration: 0.3 }}>
                 <Link
                   href={`/cartrefi-gofal/${county.slug}`}
-                  className="block rounded-[12px] border border-blush-grey bg-ivory px-3 py-2.5 text-sm font-body font-semibold text-dusk transition-colors hover:bg-primary hover:text-white"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-blush-grey bg-white px-4 py-2 text-sm font-body font-semibold text-dusk transition-colors hover:bg-primary hover:text-white hover:border-primary"
                 >
                   {locale === "cy" ? county.name_cy : county.name_en}
                   {countyCounts[county.slug] > 0 && (
-                    <span className="ml-1 text-xs text-muted-plum">({countyCounts[county.slug]})</span>
+                    <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold text-primary">
+                      {countyCounts[county.slug]}
+                    </span>
                   )}
                 </Link>
               </m.div>
@@ -275,10 +342,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── 7. CTA ── Heather bg (P6) */}
+      {/* ── 7. CTA ── Heather bg */}
       <section className="bg-primary py-16 text-center text-white sm:py-20">
         <m.div className="mx-auto max-w-[640px] px-4 sm:px-6" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerChildren}>
-          <m.h2 className="font-heading text-[26px] font-bold sm:text-[32px]" variants={fadeUp} transition={{ duration: 0.6 }}>
+          <m.h2 className="font-heading text-[26px] font-bold text-white sm:text-[32px]" variants={fadeUp} transition={{ duration: 0.6 }}>
             {locale === "cy" ? "Barod i ddechrau chwilio?" : "Ready to start searching?"}
           </m.h2>
           <m.p className="mt-4 font-body text-[18px] text-white/[0.85]" variants={fadeUp} transition={{ duration: 0.6 }}>

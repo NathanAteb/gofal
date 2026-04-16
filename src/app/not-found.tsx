@@ -19,6 +19,9 @@ export default function NotFound() {
           ? "Efallai bod y dudalen wedi symud neu ddim yn bodoli mwyach."
           : "The page may have been moved or no longer exists."}
       </p>
+      <p className="mt-4 italic text-muted-plum text-[15px]">
+        Dim byd yma — ond mae Cymru gyfan ar gofal.wales.
+      </p>
       <div className="mt-8 flex gap-3">
         <Link
           href="/"

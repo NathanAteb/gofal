@@ -7,17 +7,20 @@
   --color-primary-light: #A68AAB;
   --color-primary-dark: #4A2F4E;
   --color-secondary: #B5603A;
-  --color-secondary-light: #D4806A;
+  --color-secondary-light: #B5603A;
   --color-secondary-hover: #A0522D;
   --color-secondary-active: #8B4513;
   --color-accent: #E5AD3E;
   --color-accent-light: #F5DFA0;
-  --color-ivory: #FBF7F3;
-  --color-linen: #F0E8DF;
-  --color-dusk: #2C2430;
-  --color-muted-plum: #6B5C6B;
+  --color-ivory: #FFFFFF;
+  --color-linen: #F7F3F8;
+  --color-dusk: #1A1A1A;
+  --color-muted-plum: #4B5563;
   --color-dark-heather: #5C3D5E;
-  --color-blush-grey: #DDD4CE;
+  --color-blush-grey: #E5E7EB;
+  --color-page: #FFFFFF;
+  --color-surface: #FAFAFA;
+  --color-tint: #F7F3F8;
 
   /* Fonts */
   --font-heading: var(--font-poppins);
