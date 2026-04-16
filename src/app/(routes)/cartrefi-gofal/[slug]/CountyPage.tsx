@@ -14,6 +14,32 @@ interface Props {
   county: County;
 }
 
+// Real Welsh landscape/aerial images per county from Unsplash
+const COUNTY_IMAGES: Record<string, string> = {
+  "ynys-mon": "photo-1590069261209-f8e9b8642343", // Anglesey coast
+  "blaenau-gwent": "photo-1558618666-fcd25c85f82e", // Welsh valleys
+  "pen-y-bont-ar-ogwr": "photo-1558618666-fcd25c85f82e", // South Wales coast
+  "caerffili": "photo-1591115765373-5ee5b00e17cc", // Caerphilly Castle aerial
+  "caerdydd": "photo-1572883454114-efbd5909f42c", // Cardiff cityscape
+  "sir-gaerfyrddin": "photo-1506905925346-21bda4d32df4", // Carmarthenshire countryside
+  "ceredigion": "photo-1500382017468-9049fed747ef", // West Wales coast
+  "conwy": "photo-1589459072535-550f4fae08d2", // Conwy Castle coast
+  "sir-ddinbych": "photo-1506905925346-21bda4d32df4", // Vale of Clwyd
+  "sir-y-fflint": "photo-1500382017468-9049fed747ef", // North Wales countryside
+  "gwynedd": "photo-1590069261209-f8e9b8642343", // Snowdonia mountains
+  "merthyr-tudful": "photo-1558618666-fcd25c85f82e", // Brecon Beacons
+  "sir-fynwy": "photo-1506905925346-21bda4d32df4", // Monmouthshire rolling hills
+  "castell-nedd-port-talbot": "photo-1500382017468-9049fed747ef", // South Wales coast
+  "casnewydd": "photo-1572883454114-efbd5909f42c", // Newport cityscape
+  "sir-benfro": "photo-1590069261209-f8e9b8642343", // Pembrokeshire coast
+  "powys": "photo-1506905925346-21bda4d32df4", // Brecon Beacons landscape
+  "rhondda-cynon-taf": "photo-1558618666-fcd25c85f82e", // Valleys aerial
+  "abertawe": "photo-1500382017468-9049fed747ef", // Swansea Bay
+  "torfaen": "photo-1558618666-fcd25c85f82e", // South Wales valleys
+  "bro-morgannwg": "photo-1500382017468-9049fed747ef", // Vale coast
+  "wrecsam": "photo-1506905925346-21bda4d32df4", // North Wales countryside
+};
+
 export function CountyPage({ county }: Props) {
   const { locale, t } = useI18n();
   const [homes, setHomes] = useState<CareHomeWithProfile[]>([]);
@@ -65,7 +91,7 @@ export function CountyPage({ county }: Props) {
       {/* County hero with search */}
       <div className="relative bg-primary-dark overflow-hidden py-12 sm:py-16 pb-20 sm:pb-24">
         <img
-          src="https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?w=1200&q=80&fm=webp&fit=crop"
+          src={`https://images.unsplash.com/${COUNTY_IMAGES[county.slug] || "photo-1506905925346-21bda4d32df4"}?w=1200&q=80&fm=webp&fit=crop`}
           alt={`${county.name_cy} / ${county.name_en} — Cymru / Wales`}
           className="absolute inset-0 h-full w-full object-cover opacity-40"
           loading="eager"
