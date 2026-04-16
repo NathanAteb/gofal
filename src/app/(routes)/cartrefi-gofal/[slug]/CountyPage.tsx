@@ -59,10 +59,6 @@ export function CountyPage({ county }: Props) {
     fetchHomes(filters);
   }, [filters, fetchHomes]);
 
-  const introText = locale === "cy"
-    ? `Dewch o hyd i gartrefi gofal yn ${county.name_cy}. Mae gennym wybodaeth am bob cartref gofal cofrestredig yn y sir, gan gynnwys graddfeydd Arolygiaeth Gofal Cymru (CIW), lefelau'r Cynnig Rhagweithiol, a manylion cyswllt. Mae ${welshPct}% o boblogaeth ${county.name_cy} yn siarad Cymraeg.`
-    : `Find care homes in ${county.name_en}. We have information about every registered care home in the county, including Care Inspectorate Wales (CIW) ratings, Active Offer levels, and contact details. ${welshPct}% of ${county.name_en}'s population speaks Welsh.`;
-
   return (
     <div>
       {/* County header */}
@@ -89,8 +85,6 @@ export function CountyPage({ county }: Props) {
             { label_cy: county.name_cy, label_en: county.name_en },
           ]}
         />
-
-        <p className="mt-4 max-w-3xl text-sm text-muted-plum leading-relaxed">{introText}</p>
 
         {/* Stats strip */}
         <div className="mt-4 flex flex-wrap gap-3">
