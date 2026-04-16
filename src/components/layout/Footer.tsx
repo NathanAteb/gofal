@@ -56,7 +56,7 @@ export function Footer() {
 
           {/* Directory - Counties */}
           <div>
-            <h3 className="font-heading font-bold text-sm uppercase tracking-wider text-secondary">
+            <h3 className="font-heading font-bold text-sm uppercase tracking-wider text-white">
               {t("footer.directory")}
             </h3>
             <ul className="mt-3 space-y-1.5">
@@ -93,7 +93,7 @@ export function Footer() {
 
           {/* Information & Legal */}
           <div>
-            <h3 className="font-heading font-bold text-sm uppercase tracking-wider text-secondary">
+            <h3 className="font-heading font-bold text-sm uppercase tracking-wider text-white">
               {t("footer.information")}
             </h3>
             <ul className="mt-3 space-y-1.5">
@@ -119,7 +119,7 @@ export function Footer() {
               </li>
             </ul>
 
-            <h3 className="mt-6 font-heading font-bold text-sm uppercase tracking-wider text-secondary">
+            <h3 className="mt-6 font-heading font-bold text-sm uppercase tracking-wider text-white">
               {t("footer.legal")}
             </h3>
             <ul className="mt-3 space-y-1.5">
