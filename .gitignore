@@ -48,3 +48,8 @@ next-env.d.ts
 
 # sentry
 .sentryclirc
+
+# local agent and CLI scratch files
+.claude/projects/
+.claude/worktrees/
+supabase/.temp/
