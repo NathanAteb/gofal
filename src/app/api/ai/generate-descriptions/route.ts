@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
       const response = await askJSON<GeneratedDescription>({
         prompt,
         system: SYSTEM_GOFAL,
-        model: "claude-haiku-4-5-20251001",
+        tier: "bulk",
         maxTokens: 1024,
       });
 

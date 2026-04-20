@@ -1,30 +1,51 @@
 /**
- * Claude API Client — AIOS Intelligence Layer
+ * AI Client — AIOS Intelligence Layer
  *
- * Centralised client for all AI reasoning in gofal.wales.
- * Handles rate limiting, cost tracking, and error recovery.
+ * Routes through OpenRouter for access to multiple models.
+ * Use cheap models (Kimi, Gemini Flash) for bulk tasks,
+ * Claude for reasoning-heavy work.
  */
 
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 
-let client: Anthropic | null = null;
+let client: OpenAI | null = null;
 
-export function getClient(): Anthropic {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    throw new Error("ANTHROPIC_API_KEY is not set");
+function getClient(): OpenAI {
+  if (!process.env.OPENROUTER_API_KEY) {
+    throw new Error("OPENROUTER_API_KEY is not set");
   }
   if (!client) {
-    client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    client = new OpenAI({
+      baseURL: "https://openrouter.ai/api/v1",
+      apiKey: process.env.OPENROUTER_API_KEY,
+      defaultHeaders: {
+        "HTTP-Referer": "https://gofal.wales",
+        "X-Title": "gofal.wales AIOS",
+      },
+    });
   }
   return client;
 }
 
-export type AIModel = "claude-sonnet-4-6" | "claude-haiku-4-5-20251001";
+// Model tiers — route by task complexity
+export const MODELS = {
+  // Reasoning: briefings, strategic analysis, complex Welsh content
+  reasoning: "anthropic/claude-sonnet-4-6",
+  // Standard: scoring, outreach emails, descriptions
+  standard: "moonshotai/kimi-k2",
+  // Bulk: batch descriptions, translations, simple classification
+  bulk: "google/gemini-2.5-flash",
+  // Cheap: validation, formatting, simple extraction
+  cheap: "google/gemini-2.5-flash",
+} as const;
+
+export type ModelTier = keyof typeof MODELS;
 
 interface AIRequestOptions {
   prompt: string;
   system?: string;
-  model?: AIModel;
+  model?: string;
+  tier?: ModelTier;
   maxTokens?: number;
   temperature?: number;
 }
@@ -37,10 +58,11 @@ interface AIResponse {
   costUsd: number;
 }
 
-// Pricing per 1M tokens (as of 2026)
+// OpenRouter pricing per 1M tokens (approximate — OR returns actual cost)
 const PRICING: Record<string, { input: number; output: number }> = {
-  "claude-sonnet-4-6": { input: 3.0, output: 15.0 },
-  "claude-haiku-4-5-20251001": { input: 0.80, output: 4.0 },
+  "anthropic/claude-sonnet-4-6": { input: 3.0, output: 15.0 },
+  "moonshotai/kimi-k2": { input: 0.6, output: 2.4 },
+  "google/gemini-2.5-flash": { input: 0.15, output: 0.6 },
 };
 
 function estimateCost(
@@ -48,7 +70,7 @@ function estimateCost(
   inputTokens: number,
   outputTokens: number
 ): number {
-  const pricing = PRICING[model] || PRICING["claude-sonnet-4-6"];
+  const pricing = PRICING[model] || { input: 1.0, output: 3.0 };
   return (
     (inputTokens * pricing.input) / 1_000_000 +
     (outputTokens * pricing.output) / 1_000_000
@@ -59,33 +81,38 @@ export async function ask(options: AIRequestOptions): Promise<AIResponse> {
   const {
     prompt,
     system,
-    model = "claude-haiku-4-5-20251001",
+    model,
+    tier = "standard",
     maxTokens = 1024,
     temperature = 0.3,
   } = options;
 
+  const resolvedModel = model || MODELS[tier];
   const ai = getClient();
 
-  const response = await ai.messages.create({
-    model,
+  const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [];
+  if (system) {
+    messages.push({ role: "system", content: system });
+  }
+  messages.push({ role: "user", content: prompt });
+
+  const response = await ai.chat.completions.create({
+    model: resolvedModel,
     max_tokens: maxTokens,
     temperature,
-    ...(system ? { system } : {}),
-    messages: [{ role: "user", content: prompt }],
+    messages,
   });
 
-  const text =
-    response.content[0].type === "text" ? response.content[0].text : "";
-
-  const inputTokens = response.usage.input_tokens;
-  const outputTokens = response.usage.output_tokens;
+  const text = response.choices[0]?.message?.content || "";
+  const inputTokens = response.usage?.prompt_tokens || 0;
+  const outputTokens = response.usage?.completion_tokens || 0;
 
   return {
     text,
     inputTokens,
     outputTokens,
-    model,
-    costUsd: estimateCost(model, inputTokens, outputTokens),
+    model: resolvedModel,
+    costUsd: estimateCost(resolvedModel, inputTokens, outputTokens),
   };
 }
 

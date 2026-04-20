@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     const response = await askJSON<EnquiryScore>({
       prompt,
       system: SYSTEM_GOFAL,
-      model: "claude-haiku-4-5-20251001",
+      tier: "standard",
       maxTokens: 256,
     });
 

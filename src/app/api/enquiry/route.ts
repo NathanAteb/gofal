@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Fire-and-forget: AI enquiry scoring (non-blocking)
-    if (process.env.ANTHROPIC_API_KEY) {
+    if (process.env.OPENROUTER_API_KEY) {
       const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://gofal.wales";
       fetch(`${baseUrl}/api/ai/score-enquiry`, {
         method: "POST",
