@@ -10,6 +10,7 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { ask } from "@/lib/ai/claude";
+import { getAnalytics } from "@/lib/vercel-analytics";
 import { SYSTEM_GOFAL, dailyBriefingPrompt } from "@/lib/ai/prompts";
 
 export async function GET() {
@@ -60,6 +61,9 @@ export async function GET() {
         .eq("verified", false),
     ]);
 
+    // Fetch analytics (non-blocking — returns null if unavailable)
+    const analytics = await getAnalytics();
+
     const prompt = dailyBriefingPrompt({
       totalHomes: totalHomes || 0,
       claimedHomes: claimedHomes || 0,
@@ -68,6 +72,14 @@ export async function GET() {
       pendingClaims: pendingClaims || 0,
       recentEnquiries: recentEnquiries || [],
       recentClaims: recentClaims || [],
+      analytics: analytics.last7Days ? {
+        visitors: analytics.last7Days.visitors,
+        pageViews: analytics.last7Days.pageViews,
+        previousVisitors: analytics.previous7Days?.visitors || 0,
+        previousPageViews: analytics.previous7Days?.pageViews || 0,
+        topPages: analytics.last7Days.topPages,
+        topReferrers: analytics.last7Days.topReferrers,
+      } : undefined,
     });
 
     const response = await ask({

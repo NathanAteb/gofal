@@ -75,7 +75,32 @@ export function dailyBriefingPrompt(data: {
     verified: boolean;
     created_at: string;
   }>;
+  analytics?: {
+    visitors: number;
+    pageViews: number;
+    previousVisitors: number;
+    previousPageViews: number;
+    topPages: Array<{ key: string; total: number }>;
+    topReferrers: Array<{ key: string; total: number }>;
+  };
 }): string {
+  const visitorChange = data.analytics && data.analytics.previousVisitors > 0
+    ? ((data.analytics.visitors - data.analytics.previousVisitors) / data.analytics.previousVisitors * 100).toFixed(0)
+    : null;
+  const pvChange = data.analytics && data.analytics.previousPageViews > 0
+    ? ((data.analytics.pageViews - data.analytics.previousPageViews) / data.analytics.previousPageViews * 100).toFixed(0)
+    : null;
+
+  const analyticsBlock = data.analytics ? `
+Website traffic (last 7 days):
+- Visitors: ${data.analytics.visitors}${visitorChange ? ` (${Number(visitorChange) >= 0 ? "+" : ""}${visitorChange}% vs previous week)` : ""}
+- Page views: ${data.analytics.pageViews}${pvChange ? ` (${Number(pvChange) >= 0 ? "+" : ""}${pvChange}% vs previous week)` : ""}
+- Top pages: ${data.analytics.topPages.map((p) => `${p.key} (${p.total})`).join(", ") || "none"}
+- Top referrers: ${data.analytics.topReferrers.map((r) => `${r.key} (${r.total})`).join(", ") || "none (all direct/organic)"}
+` : `
+Website traffic: Not available (enable Vercel Web Analytics)
+`;
+
   return `Generate a morning business briefing for Nathan (founder of gofal.wales).
 
 Today's date: ${new Date().toISOString().split("T")[0]}
@@ -86,7 +111,7 @@ Platform stats:
 - Total enquiries all time: ${data.totalEnquiries}
 - New enquiries (last 7 days): ${data.newEnquiries}
 - Pending claims (unverified): ${data.pendingClaims}
-
+${analyticsBlock}
 Recent enquiries (last 7 days):
 ${data.recentEnquiries.map((e) => `- ${e.family_name}: ${e.care_type}, timeline "${e.timeline}", Welsh speaker: ${e.welsh_speaker ? "yes" : "no"}, status: ${e.status} (${e.created_at})`).join("\n") || "None"}
 
@@ -95,10 +120,10 @@ ${data.recentClaims.map((c) => `- ${c.claimant_name} (${c.claimant_role}), verif
 
 Generate a briefing with these sections:
 1. **TL;DR** — one sentence summary of platform health
-2. **Key numbers** — 3-5 bullet points with the most important metrics and week-over-week direction
+2. **Key numbers** — 3-5 bullet points with the most important metrics and week-over-week direction (include traffic trends)
 3. **Action items** — 2-3 specific things Nathan should do today, prioritised
-4. **Opportunities** — any patterns or opportunities spotted in the data
-5. **Risk flags** — anything concerning (e.g. no enquiries, claim drop-off)
+4. **Opportunities** — any patterns in traffic, referrers, or popular pages that suggest content or outreach priorities
+5. **Risk flags** — anything concerning (traffic drops, no enquiries, claim drop-off)
 
 Keep it under 300 words. Be direct and honest — Nathan doesn't want sugar-coating.`;
 }
