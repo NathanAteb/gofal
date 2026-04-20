@@ -5,22 +5,18 @@
  *
  * Called by Vercel Cron at 7am UK time.
  * Generates AI briefing and emails it to Nathan.
- *
- * Vercel cron config in vercel.json:
- * { "crons": [{ "path": "/api/cron/daily-briefing", "schedule": "0 7 * * *" }] }
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { sendTransactionalEmail } from "@/lib/email/resend";
 
 export async function GET(request: NextRequest) {
-  // Verify cron secret to prevent unauthorized access
   const authHeader = request.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    // Call the briefing endpoint internally
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://gofal.wales";
     const briefingRes = await fetch(`${baseUrl}/api/ai/briefing`);
     const briefingData = await briefingRes.json();
@@ -30,16 +26,12 @@ export async function GET(request: NextRequest) {
     }
 
     // Email the briefing to Nathan
-    if (process.env.RESEND_API_KEY && process.env.NATHAN_EMAIL) {
-      const { Resend } = await import("resend");
-      const resend = new Resend(process.env.RESEND_API_KEY);
-
+    if (process.env.NATHAN_EMAIL) {
       const today = new Date().toISOString().split("T")[0];
 
-      await resend.emails.send({
-        from: process.env.RESEND_FROM_EMAIL || "noreply@gofal.wales",
+      await sendTransactionalEmail({
         to: process.env.NATHAN_EMAIL,
-        subject: `gofal.wales — Bore da, Nathan 🏴󠁧󠁢󠁷󠁬󠁳󠁿 (${today})`,
+        subject: `gofal.wales — Bore da, Nathan (${today})`,
         html: `
           <div style="font-family: Nunito, sans-serif; max-width: 600px; margin: 0 auto; color: #2C2430;">
             <div style="background: #4A2F4E; padding: 24px; border-radius: 16px 16px 0 0;">
@@ -70,7 +62,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       briefing_generated: true,
-      email_sent: !!(process.env.RESEND_API_KEY && process.env.NATHAN_EMAIL),
+      email_sent: !!process.env.NATHAN_EMAIL,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";

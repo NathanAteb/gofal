@@ -27,16 +27,14 @@ function getClient(): OpenAI {
   return client;
 }
 
-// Model tiers — route by task complexity
+// Model tiers — route by quality stakes × reasoning complexity
 export const MODELS = {
-  // Reasoning: briefings, strategic analysis, complex Welsh content
+  // Reasoning: quality matters, volume low — briefings, Q&A, SQL, LinkedIn
   reasoning: "anthropic/claude-sonnet-4-6",
-  // Standard: scoring, outreach emails, descriptions
+  // Standard: customer-facing but higher volume — outreach emails
   standard: "moonshotai/kimi-k2",
-  // Bulk: batch descriptions, translations, simple classification
+  // Bulk: structured output, high volume — descriptions, scoring
   bulk: "google/gemini-2.5-flash",
-  // Cheap: validation, formatting, simple extraction
-  cheap: "google/gemini-2.5-flash",
 } as const;
 
 export type ModelTier = keyof typeof MODELS;

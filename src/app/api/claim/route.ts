@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { sendTransactionalEmail } from "@/lib/email/resend";
 import { randomBytes } from "crypto";
 
 export async function POST(request: NextRequest) {
@@ -50,29 +51,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // Send verification email
-    if (process.env.RESEND_API_KEY) {
-      try {
-        const { Resend } = await import("resend");
-        const resend = new Resend(process.env.RESEND_API_KEY);
+    // Send verification email via Resend
+    const verifyUrl = `https://gofal.wales/hawlio/verified?token=${verification_token}`;
 
-        const verifyUrl = `https://gofal.wales/hawlio/verified?token=${verification_token}`;
-
-        await resend.emails.send({
-          from: process.env.RESEND_FROM_EMAIL || "noreply@gofal.wales",
-          to: claimant_email,
-          subject: "Dilysu eich hawliad / Verify your claim — gofal.wales",
-          html: `
-            <h2>Dilysych eich hawliad / Verify your claim</h2>
-            <p>Cliciwch y ddolen isod i gwblhau eich hawliad ar gofal.wales:</p>
-            <p>Click the link below to complete your claim on gofal.wales:</p>
-            <p><a href="${verifyUrl}" style="display:inline-block;padding:12px 24px;background:#D4806A;color:white;text-decoration:none;border-radius:9999px;font-weight:bold;">Dilysu / Verify</a></p>
-          `,
-        });
-      } catch {
-        // Email failed but claim was saved
-      }
-    }
+    await sendTransactionalEmail({
+      to: claimant_email,
+      subject: "Dilysu eich hawliad / Verify your claim — gofal.wales",
+      html: `
+        <h2>Dilysych eich hawliad / Verify your claim</h2>
+        <p>Cliciwch y ddolen isod i gwblhau eich hawliad ar gofal.wales:</p>
+        <p>Click the link below to complete your claim on gofal.wales:</p>
+        <p><a href="${verifyUrl}" style="display:inline-block;padding:12px 24px;background:#D4806A;color:white;text-decoration:none;border-radius:9999px;font-weight:bold;">Dilysu / Verify</a></p>
+      `,
+    });
 
     // Telegram alert — new claim submitted
     if (process.env.TELEGRAM_BOT_TOKEN) {
@@ -123,7 +114,7 @@ export async function GET(request: NextRequest) {
       .update({ is_claimed: true })
       .eq("id", claim.care_home_id);
 
-    // Telegram alert — claim verified! 🎉
+    // Telegram alert — claim verified!
     if (process.env.TELEGRAM_BOT_TOKEN) {
       const { data: home } = await supabase
         .from("care_homes")

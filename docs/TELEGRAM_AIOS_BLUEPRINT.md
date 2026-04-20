@@ -40,8 +40,8 @@ Built for gofal.wales. Reusable for any project.
 | Database | Supabase (Postgres) | All business data |
 | AI reasoning | OpenRouter (multi-model) | Briefings, scoring, generation |
 | Code execution | Claude CLI on Mac Mini | Edit code from phone |
-| Email sending | Nodemailer + Gmail SMTP | Send from your real email |
-| Tunnel | Cloudflare Quick Tunnel | Expose localhost to internet |
+| Email sending | Resend | Outreach + transactional email with open/bounce tracking |
+| Hosting | Vercel | Webhook + preview deploys + production |
 | Process manager | pm2 (optional) | Keep worker alive |
 
 ---
@@ -54,8 +54,7 @@ Built for gofal.wales. Reusable for any project.
 
 ### 2. Install dependencies
 ```bash
-npm install openai nodemailer @supabase/supabase-js
-npm install -D @types/nodemailer
+npm install openai resend @supabase/supabase-js
 ```
 
 ### 3. Environment variables
@@ -71,9 +70,19 @@ OPENROUTER_API_KEY=
 TELEGRAM_BOT_TOKEN=
 TELEGRAM_CHAT_ID=       # Your personal chat ID (lock it down)
 
-# Gmail (for sending from your real email)
-GMAIL_ADDRESS=
-GMAIL_APP_PASSWORD=     # From myaccount.google.com/apppasswords
+# Resend (email)
+RESEND_API_KEY=
+RESEND_FROM_NATHAN="Your Name <you@domain.com>"
+RESEND_FROM_HELLO="App Name <hello@domain.com>"
+RESEND_REPLY_TO=you@domain.com
+RESEND_WEBHOOK_SECRET=
+
+# Deploy flow
+VERCEL_WEBHOOK_SECRET=
+VERCEL_API_TOKEN=
+VERCEL_PROJECT_ID=
+GITHUB_TOKEN=
+GITHUB_REPO=user/repo
 
 # Cron/security
 CRON_SECRET=            # Random string for webhook verification
@@ -187,11 +196,14 @@ pm2 start scripts/code-worker.ts --interpreter "npx" --interpreter-args "tsx"
 |---------|-------------|
 | `/linkedin [topic]` | AI generates a LinkedIn post with your data baked in |
 
-### Code
+### Code & Deploy
 | Command | What it does |
 |---------|-------------|
-| `/code [prompt]` | Queues a Claude Code task on your Mac Mini |
-| `/cancel` | Cancel running/pending tasks |
+| `/code [prompt]` | Queues a Claude Code task → creates branch → pushes → Vercel previews |
+| `/deploy [task_id]` | Merges preview branch to main → production deploy |
+| `/cancel [task_id]` | Cancel task + delete the branch |
+| `/rollback` | Show previous production deployment |
+| `/rollback confirm` | Promote previous deployment to production |
 
 ### Chat
 | Command | What it does |
@@ -273,24 +285,45 @@ Captures output + git diff → updates code_tasks row
 Sends result back to Telegram with files changed
 ```
 
-### 5. Gmail SMTP (send from your real address)
+### 5. Resend Email (outreach + transactional)
 ```typescript
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.GMAIL_ADDRESS,
-    pass: process.env.GMAIL_APP_PASSWORD,  // App Password, not your real password
-  },
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+// Personal outreach (from you)
+await resend.emails.send({
+  from: "Nathan Bowen <nathan@gofal.wales>",
+  to: recipient,
+  subject: "...",
+  html: "...",
+  replyTo: "nathan@gofal.wales",
 });
 
-await transporter.sendMail({
-  from: `"Your Name" <${process.env.GMAIL_ADDRESS}>`,
+// Transactional (from the app)
+await resend.emails.send({
+  from: "gofal.wales <hello@gofal.wales>",
   to: recipient,
   subject: "...",
   html: "...",
 });
+```
+
+### 5b. Preview Deploy Flow (code from phone → production)
+```
+/code "add dark mode"
+  → Worker creates branch telegram/abc12345
+  → Runs Claude CLI
+  → Typechecks
+  → Pushes to GitHub
+  → Vercel auto-builds preview
+  → Vercel webhook fires → bot sends preview URL
+  → You review on phone
+/deploy abc12345
+  → Creates PR → squash merges → deletes branch
+  → Vercel builds production
+/rollback confirm
+  → Promotes previous Vercel deployment
 ```
 
 ### 6. Auth — Lock to Your Chat ID Only
