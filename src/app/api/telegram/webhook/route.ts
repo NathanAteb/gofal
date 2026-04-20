@@ -614,6 +614,62 @@ Rules:
   await sendMessage(chatId, `📝 *LinkedIn Draft:*\n\n${response.text}\n\n_Copy and paste to LinkedIn. Cost: $${response.costUsd.toFixed(4)}_`);
 }
 
+// --- /code — Queue a Claude Code task to run on the Mac Mini ---
+async function handleCode(chatId: number, prompt: string) {
+  if (!prompt) {
+    await sendMessage(chatId, "Usage: `/code add a dark mode toggle to the header`\nRuns Claude Code on your Mac Mini and sends back the result.");
+    return;
+  }
+
+  const supabase = await createServiceClient();
+
+  // Check no task already running
+  const { data: running } = await supabase
+    .from("code_tasks")
+    .select("id, prompt")
+    .eq("status", "running")
+    .limit(1);
+
+  if (running?.length) {
+    await sendMessage(chatId, `⏳ A task is already running:\n\`${(running[0].prompt as string).slice(0, 100)}\`\n\nWait for it to finish or use /cancel.`);
+    return;
+  }
+
+  // Insert task — worker will pick it up
+  const { data: task, error } = await supabase
+    .from("code_tasks")
+    .insert({
+      prompt,
+      status: "pending",
+      telegram_chat_id: String(chatId),
+    })
+    .select("id")
+    .single();
+
+  if (error) {
+    await sendMessage(chatId, `❌ Failed to queue task: ${error.message}`);
+    return;
+  }
+
+  await sendMessage(chatId, `📋 *Task queued*\n\`${prompt.slice(0, 200)}\`\n\n_Worker will pick it up in seconds..._\nID: \`${task.id}\``);
+}
+
+// --- /cancel — Cancel running/pending code tasks ---
+async function handleCancel(chatId: number) {
+  const supabase = await createServiceClient();
+
+  const { data: tasks } = await supabase
+    .from("code_tasks")
+    .update({ status: "error", result: "Cancelled by user", completed_at: new Date().toISOString() })
+    .in("status", ["pending", "running"])
+    .select("id");
+
+  await sendMessage(chatId, tasks?.length
+    ? `🛑 Cancelled ${tasks.length} task(s).`
+    : "No active tasks to cancel."
+  );
+}
+
 // --- Telegram alert helper (called from other API routes) ---
 export async function sendTelegramAlert(text: string) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
@@ -663,6 +719,11 @@ export async function POST(request: NextRequest) {
     } else if (text.startsWith("/county") || text.startsWith("/sir")) {
       const county = text.split(" ").slice(1).join(" ").trim();
       await handleCountyBreakdown(chatId, county || undefined);
+    } else if (text.startsWith("/code ")) {
+      const prompt = text.slice(6).trim();
+      await handleCode(chatId, prompt);
+    } else if (text === "/cancel") {
+      await handleCancel(chatId);
     } else if (text.startsWith("/send ")) {
       const county = text.split(" ").slice(1).join(" ").trim();
       await handleSend(chatId, county);
@@ -705,6 +766,10 @@ export async function POST(request: NextRequest) {
 📣 *Content*
 /linkedin — Generate a LinkedIn post
 /linkedin Active Offer — Post about a specific topic
+
+🛠 *Code*
+/code [prompt] — Run Claude Code on your Mac Mini
+/cancel — Cancel running task
 
 💬 *Chat*
 /ask [anything] — or just type freely
