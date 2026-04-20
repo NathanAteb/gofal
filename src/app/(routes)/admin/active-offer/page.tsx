@@ -93,7 +93,7 @@ function Assessment() {
     return (
       <div className="mx-auto max-w-xl px-4 py-16 text-center">
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="green" strokeWidth="2"><path d="M20 6L9 17l-5-5" /></svg>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-green-600"><path d="M20 6L9 17l-5-5" /></svg>
         </div>
         <h2 className="font-heading text-2xl font-bold">Diolch! / Thank you!</h2>
         <p className="mt-3 text-muted-plum">
@@ -101,7 +101,7 @@ function Assessment() {
         </p>
         <div className="mt-4 flex justify-center gap-1">
           {[1, 2, 3].map((s) => (
-            <svg key={s} width="24" height="24" viewBox="0 0 24 24" fill={s <= level ? "#E5AD3E" : "none"} stroke="#E5AD3E" strokeWidth="2">
+            <svg key={s} width="24" height="24" viewBox="0 0 24 24" fill={s <= level ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" className="text-accent">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
             </svg>
           ))}

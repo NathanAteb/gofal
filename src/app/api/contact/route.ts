@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { sendTransactionalEmail } from "@/lib/email/resend";
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,27 +13,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Send email if Resend is configured
-    if (process.env.RESEND_API_KEY && process.env.NATHAN_EMAIL) {
-      try {
-        const { Resend } = await import("resend");
-        const resend = new Resend(process.env.RESEND_API_KEY);
-
-        await resend.emails.send({
-          from: process.env.RESEND_FROM_EMAIL || "noreply@gofal.wales",
-          to: process.env.NATHAN_EMAIL,
-          subject: `Neges newydd / New message — ${name}`,
-          html: `
-            <h2>Neges newydd o gofal.wales</h2>
-            <p><strong>Enw / Name:</strong> ${name}</p>
-            <p><strong>E-bost / Email:</strong> ${email}</p>
-            <p><strong>Neges / Message:</strong></p>
-            <p>${message}</p>
-          `,
-        });
-      } catch {
-        // Email failed but we still return success
-      }
+    if (process.env.NATHAN_EMAIL) {
+      await sendTransactionalEmail({
+        to: process.env.NATHAN_EMAIL,
+        subject: `Neges newydd / New message — ${name}`,
+        html: `
+          <h2>Neges newydd o gofal.wales</h2>
+          <p><strong>Enw / Name:</strong> ${name}</p>
+          <p><strong>E-bost / Email:</strong> ${email}</p>
+          <p><strong>Neges / Message:</strong></p>
+          <p>${message}</p>
+        `,
+      });
     }
 
     return NextResponse.json({ success: true });

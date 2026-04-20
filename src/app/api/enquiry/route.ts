@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { sendTransactionalEmail } from "@/lib/email/resend";
 
 export async function POST(request: NextRequest) {
   try {
@@ -58,15 +59,11 @@ export async function POST(request: NextRequest) {
       .eq("id", care_home_id)
       .single();
 
-    // Send emails if Resend is configured
-    if (process.env.RESEND_API_KEY && careHome?.email) {
+    // Send emails via Resend
+    if (careHome?.email) {
       try {
-        const { Resend } = await import("resend");
-        const resend = new Resend(process.env.RESEND_API_KEY);
-
         // Notify care home
-        await resend.emails.send({
-          from: process.env.RESEND_FROM_EMAIL || "noreply@gofal.wales",
+        await sendTransactionalEmail({
           to: careHome.email,
           subject: `Ymholiad newydd / New enquiry — ${family_name}`,
           html: `
@@ -83,8 +80,7 @@ export async function POST(request: NextRequest) {
         });
 
         // Confirm to family
-        await resend.emails.send({
-          from: process.env.RESEND_FROM_EMAIL || "noreply@gofal.wales",
+        await sendTransactionalEmail({
           to: family_email,
           subject: `Cadarnhad ymholiad / Enquiry confirmation — ${careHome.name}`,
           html: `
@@ -103,6 +99,25 @@ export async function POST(request: NextRequest) {
       } catch {
         // Email sending failed but enquiry was saved
       }
+    }
+
+    // Fire-and-forget: AI enquiry scoring (non-blocking)
+    if (process.env.OPENROUTER_API_KEY) {
+      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://gofal.wales";
+      fetch(`${baseUrl}/api/ai/score-enquiry`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enquiry_id: enquiry.id }),
+      }).catch(() => {});
+    }
+
+    // Fire-and-forget: Telegram alert
+    if (process.env.TELEGRAM_BOT_TOKEN) {
+      import("@/app/api/telegram/webhook/route").then(({ sendTelegramAlert }) => {
+        sendTelegramAlert(
+          `🔔 *New Enquiry*\n👤 ${family_name}\n🏠 ${careHome?.name || "Unknown"}\n📋 ${care_type}\n⏰ ${timeline}\n🏴󠁧󠁢󠁷󠁬󠁳󠁿 Welsh: ${welsh_speaker ? "Yes" : "No"}${message ? `\n💬 "${message}"` : ""}`
+        ).catch(() => {});
+      }).catch(() => {});
     }
 
     return NextResponse.json({ success: true, id: enquiry.id });

@@ -1,0 +1,2 @@
+UPDATE care_homes SET lat = 51.747839, lng = -3.359151 WHERE postcode = 'CF47 0UX' AND lat IS NULL;
+UPDATE care_homes SET lat = 51.571087, lng = -3.222389 WHERE postcode = 'CF83 1EF' AND lat IS NULL;
