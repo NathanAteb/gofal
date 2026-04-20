@@ -21,8 +21,8 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
-import { ask } from "@/lib/ai/claude";
-import { SYSTEM_GOFAL, dailyBriefingPrompt } from "@/lib/ai/prompts";
+import { ask, askJSON } from "@/lib/ai/claude";
+import { SYSTEM_GOFAL, dailyBriefingPrompt, outreachEmailPrompt } from "@/lib/ai/prompts";
 
 const TELEGRAM_API = "https://api.telegram.org/bot";
 
@@ -222,6 +222,203 @@ async function handleCountyBreakdown(chatId: number, county?: string) {
   }
 }
 
+async function handleOutreach(chatId: number, county: string) {
+  if (!county) {
+    await sendMessage(chatId, "Usage: `/outreach Cardiff`\nGenerates a personalised outreach email for the first unclaimed home in that county.");
+    return;
+  }
+
+  await sendMessage(chatId, `✍️ Finding unclaimed home in ${county}...`);
+
+  const supabase = await createServiceClient();
+
+  const { data: home } = await supabase
+    .from("care_homes")
+    .select("id, name, town, county, service_type, bed_count, active_offer_level, ciw_rating_care_support, operator_name, email")
+    .ilike("county", `%${county}%`)
+    .eq("is_claimed", false)
+    .eq("is_active", true)
+    .not("email", "is", null)
+    .limit(1)
+    .single();
+
+  if (!home) {
+    await sendMessage(chatId, `No unclaimed homes with email found in "${county}".`);
+    return;
+  }
+
+  const response = await askJSON<{
+    subject_cy: string;
+    subject_en: string;
+    body_cy: string;
+    body_en: string;
+  }>({
+    prompt: outreachEmailPrompt({
+      name: home.name,
+      town: home.town,
+      county: home.county,
+      service_type: home.service_type,
+      bed_count: home.bed_count,
+      active_offer_level: home.active_offer_level,
+      ciw_rating_care_support: home.ciw_rating_care_support,
+      operator_name: home.operator_name,
+    }),
+    system: SYSTEM_GOFAL,
+    tier: "standard",
+    maxTokens: 1024,
+  });
+
+  const d = response.data;
+  await sendMessage(chatId,
+    `📧 *Outreach for ${home.name}*\n📍 ${home.town}, ${home.county}\n📩 ${home.email}\n\n` +
+    `*Subject (CY):* ${d.subject_cy}\n*Subject (EN):* ${d.subject_en}\n\n` +
+    `--- Welsh ---\n${d.body_cy}\n\n--- English ---\n${d.body_en}\n\n` +
+    `_Cost: $${response.costUsd.toFixed(4)}_`
+  );
+}
+
+async function handleLookup(chatId: number, query: string) {
+  if (!query) {
+    await sendMessage(chatId, "Usage: `/lookup Bryn Mawr` or `/lookup SIN-00012345`\nLooks up a specific care home.");
+    return;
+  }
+
+  const supabase = await createServiceClient();
+
+  // Try by CIW ID first, then by name
+  let home;
+  if (query.startsWith("SIN-")) {
+    const { data } = await supabase
+      .from("care_homes")
+      .select("*, care_home_profiles(*)")
+      .eq("ciw_service_id", query)
+      .single();
+    home = data;
+  } else {
+    const { data } = await supabase
+      .from("care_homes")
+      .select("*, care_home_profiles(*)")
+      .ilike("name", `%${query}%`)
+      .limit(1)
+      .single();
+    home = data;
+  }
+
+  if (!home) {
+    await sendMessage(chatId, `No care home found for "${query}".`);
+    return;
+  }
+
+  const p = home.care_home_profiles;
+  const ratings = [
+    home.ciw_rating_wellbeing ? `Well-being: ${home.ciw_rating_wellbeing}` : null,
+    home.ciw_rating_care_support ? `Care & Support: ${home.ciw_rating_care_support}` : null,
+    home.ciw_rating_leadership ? `Leadership: ${home.ciw_rating_leadership}` : null,
+    home.ciw_rating_environment ? `Environment: ${home.ciw_rating_environment}` : null,
+  ].filter(Boolean).join("\n");
+
+  const msg = `🏠 *${home.name}*
+📍 ${home.address_line_1}, ${home.town}, ${home.postcode}
+📞 ${home.phone || "—"}
+📧 ${home.email || "—"}
+🌐 ${home.website || "—"}
+
+*CIW ID:* ${home.ciw_service_id}
+*Type:* ${home.service_type}
+*Beds:* ${home.bed_count || "—"}
+*Operator:* ${home.operator_name || "—"}
+*Active Offer:* ${home.active_offer_level}/3
+*Claimed:* ${home.is_claimed ? "Yes ✅" : "No"}
+*Tier:* ${home.listing_tier}
+
+*CIW Ratings:*
+${ratings || "Not yet inspected"}
+
+${p?.weekly_fee_from ? `*Fees:* £${p.weekly_fee_from}–£${p.weekly_fee_to}/week` : ""}
+${home.ciw_report_url ? `[CIW Report](${home.ciw_report_url})` : ""}
+[View on gofal.wales](https://gofal.wales/cartrefi-gofal/${home.slug})`;
+
+  await sendMessage(chatId, msg);
+}
+
+async function handleSearch(chatId: number, query: string) {
+  if (!query) {
+    await sendMessage(chatId, "Usage: `/search dementia Swansea` or `/search nursing Gwynedd`");
+    return;
+  }
+
+  const supabase = await createServiceClient();
+
+  const { data: homes, count } = await supabase
+    .from("care_homes")
+    .select("name, town, county, service_type, active_offer_level, ciw_rating_care_support", { count: "exact" })
+    .eq("is_active", true)
+    .or(`name.ilike.%${query}%,town.ilike.%${query}%,service_type.ilike.%${query}%,county.ilike.%${query}%`)
+    .order("name")
+    .limit(10);
+
+  if (!homes?.length) {
+    await sendMessage(chatId, `No results for "${query}".`);
+    return;
+  }
+
+  const lines = homes.map((h) =>
+    `• *${h.name}* (${h.town}, ${h.county})\n  ${h.service_type} · AO:${h.active_offer_level}/3 · CIW:${h.ciw_rating_care_support || "n/a"}`
+  );
+
+  await sendMessage(chatId, `🔍 *"${query}"* — ${count} results\n\n${lines.join("\n\n")}`);
+}
+
+async function handleData(chatId: number, question: string) {
+  if (!question) {
+    await sendMessage(chatId, "Usage: `/data how many nursing homes in Cardiff?`\nI'll query the database to answer.");
+    return;
+  }
+
+  await sendMessage(chatId, "🔍 Querying database...");
+
+  const supabase = await createServiceClient();
+
+  // Ask AI to generate a SQL query
+  const sqlResponse = await ask({
+    prompt: `Given this Postgres schema:
+- care_homes: id, name, town, county, postcode, phone, email, website, service_type, operator_name, bed_count, active_offer_level (0-3), ciw_rating_wellbeing, ciw_rating_care_support, ciw_rating_leadership, ciw_rating_environment, is_claimed, is_active, listing_tier, slug
+- care_home_profiles: care_home_id, description, weekly_fee_from, weekly_fee_to
+- enquiries: id, care_home_id, family_name, care_type, timeline, welsh_speaker, status, created_at
+- claims: id, care_home_id, claimant_name, verified, created_at
+
+Write a SELECT-only SQL query to answer: "${question}"
+
+Rules: SELECT only — no INSERT, UPDATE, DELETE, DROP, ALTER. Always add LIMIT 20. Return ONLY the SQL, no explanation.`,
+    system: "You are a SQL expert. Return only the SQL query, nothing else.",
+    tier: "standard",
+    maxTokens: 256,
+    temperature: 0,
+  });
+
+  const sql = sqlResponse.text.replace(/```sql\n?/g, "").replace(/```\n?/g, "").trim();
+
+  // Safety check
+  if (/\b(INSERT|UPDATE|DELETE|DROP|ALTER|TRUNCATE|CREATE)\b/i.test(sql)) {
+    await sendMessage(chatId, "⛔ Query blocked — read-only queries only.");
+    return;
+  }
+
+  try {
+    const { data, error } = await supabase.rpc("exec_sql", { query: sql }).single();
+
+    if (error) {
+      // Fallback: run via direct query on a known table
+      await sendMessage(chatId, `SQL generated:\n\`${sql}\`\n\n⚠️ Direct SQL execution requires an RPC function. For now, use /ask instead.`);
+      return;
+    }
+
+    await sendMessage(chatId, `📊 *Result:*\n\`\`\`\n${JSON.stringify(data, null, 2)}\n\`\`\`\n\n_Query: ${sql}_`);
+  } catch {
+    await sendMessage(chatId, `SQL generated:\n\`${sql}\`\n\n💡 Tip: Run this in the Supabase SQL editor.`);
+  }
+}
+
 export async function POST(request: NextRequest) {
   // Verify Telegram secret token
   const secretToken = request.headers.get("x-telegram-bot-api-secret-token");
@@ -254,17 +451,37 @@ export async function POST(request: NextRequest) {
     } else if (text.startsWith("/county") || text.startsWith("/sir")) {
       const county = text.split(" ").slice(1).join(" ").trim();
       await handleCountyBreakdown(chatId, county || undefined);
+    } else if (text.startsWith("/outreach")) {
+      const county = text.split(" ").slice(1).join(" ").trim();
+      await handleOutreach(chatId, county);
+    } else if (text.startsWith("/lookup ") || text.startsWith("/home ")) {
+      const query = text.split(" ").slice(1).join(" ").trim();
+      await handleLookup(chatId, query);
+    } else if (text.startsWith("/search ") || text.startsWith("/chwilio ")) {
+      const query = text.split(" ").slice(1).join(" ").trim();
+      await handleSearch(chatId, query);
+    } else if (text.startsWith("/data ") || text.startsWith("/sql ")) {
+      const question = text.split(" ").slice(1).join(" ").trim();
+      await handleData(chatId, question);
     } else if (text === "/help" || text === "/start") {
       await sendMessage(chatId, `🏴󠁧󠁢󠁷󠁬󠁳󠁿 *gofal.wales AIOS*
 
-Commands:
-/briefing — Morning business briefing
-/stats — Quick platform numbers
-/county — Homes by county
-/county Cardiff — Homes in a specific county
-/ask [question] — Ask anything
+📊 *Dashboard*
+/briefing — AI morning briefing
+/stats — Platform numbers
 
-Or just type a question and I'll answer.
+🔍 *Explore*
+/county — All counties breakdown
+/county Cardiff — Specific county
+/search nursing Gwynedd — Search homes
+/lookup Bryn Mawr — Full care home profile
+/data how many nursing homes? — AI queries the DB
+
+📧 *Outreach*
+/outreach Cardiff — Generate email for an unclaimed home
+
+💬 *Chat*
+/ask [anything] — or just type freely
 
 _Bore da, Nathan!_`);
     } else if (text.startsWith("/ask ")) {
