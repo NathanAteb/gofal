@@ -105,6 +105,16 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Fire-and-forget: AI enquiry scoring (non-blocking)
+    if (process.env.ANTHROPIC_API_KEY) {
+      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://gofal.wales";
+      fetch(`${baseUrl}/api/ai/score-enquiry`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enquiry_id: enquiry.id }),
+      }).catch(() => {});
+    }
+
     return NextResponse.json({ success: true, id: enquiry.id });
   } catch {
     return NextResponse.json(
