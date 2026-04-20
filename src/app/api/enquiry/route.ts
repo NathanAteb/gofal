@@ -115,6 +115,15 @@ export async function POST(request: NextRequest) {
       }).catch(() => {});
     }
 
+    // Fire-and-forget: Telegram alert
+    if (process.env.TELEGRAM_BOT_TOKEN) {
+      import("@/app/api/telegram/webhook/route").then(({ sendTelegramAlert }) => {
+        sendTelegramAlert(
+          `🔔 *New Enquiry*\n👤 ${family_name}\n🏠 ${careHome?.name || "Unknown"}\n📋 ${care_type}\n⏰ ${timeline}\n🏴󠁧󠁢󠁷󠁬󠁳󠁿 Welsh: ${welsh_speaker ? "Yes" : "No"}${message ? `\n💬 "${message}"` : ""}`
+        ).catch(() => {});
+      }).catch(() => {});
+    }
+
     return NextResponse.json({ success: true, id: enquiry.id });
   } catch {
     return NextResponse.json(

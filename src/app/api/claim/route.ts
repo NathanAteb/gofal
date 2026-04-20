@@ -74,6 +74,15 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Telegram alert — new claim submitted
+    if (process.env.TELEGRAM_BOT_TOKEN) {
+      import("@/app/api/telegram/webhook/route").then(({ sendTelegramAlert }) => {
+        sendTelegramAlert(
+          `📋 *New Claim Submitted*\n👤 ${claimant_name} (${claimant_role})\n📧 ${claimant_email}\n⏳ Awaiting verification`
+        ).catch(() => {});
+      }).catch(() => {});
+    }
+
     return NextResponse.json({ success: true, id: claim.id });
   } catch {
     return NextResponse.json(
@@ -113,6 +122,27 @@ export async function GET(request: NextRequest) {
       .from("care_homes")
       .update({ is_claimed: true })
       .eq("id", claim.care_home_id);
+
+    // Telegram alert — claim verified! 🎉
+    if (process.env.TELEGRAM_BOT_TOKEN) {
+      const { data: home } = await supabase
+        .from("care_homes")
+        .select("name, town, county")
+        .eq("id", claim.care_home_id)
+        .single();
+
+      import("@/app/api/telegram/webhook/route").then(({ sendTelegramAlert }) => {
+        sendTelegramAlert(
+          `🎉 *CLAIM VERIFIED!*\n🏠 ${home?.name || "Unknown"}\n📍 ${home?.town || ""}, ${home?.county || ""}\n\nThis home is now claimed. Time to nurture → upgrade → Ateb pitch.`
+        ).catch(() => {});
+      }).catch(() => {});
+
+      // Update outreach_log if this home was in the pipeline
+      await supabase
+        .from("outreach_log")
+        .update({ status: "claimed" })
+        .eq("care_home_id", claim.care_home_id);
+    }
 
     return NextResponse.json({ success: true });
   } catch {

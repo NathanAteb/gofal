@@ -22,6 +22,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { ask, askJSON } from "@/lib/ai/claude";
+import { sendEmail } from "@/lib/email/gmail";
 import { SYSTEM_GOFAL, dailyBriefingPrompt, outreachEmailPrompt } from "@/lib/ai/prompts";
 
 const TELEGRAM_API = "https://api.telegram.org/bot";
@@ -419,6 +420,217 @@ Rules: SELECT only — no INSERT, UPDATE, DELETE, DROP, ALTER. Always add LIMIT 
   }
 }
 
+// --- /send [county] — Generate + send outreach email from Nathan's Gmail ---
+async function handleSend(chatId: number, county: string) {
+  if (!county) {
+    await sendMessage(chatId, "Usage: `/send Cardiff`\nGenerates and sends an outreach email from your Gmail to an unclaimed home.");
+    return;
+  }
+
+  await sendMessage(chatId, `📧 Finding unclaimed home in ${county}...`);
+
+  const supabase = await createServiceClient();
+
+  // Find unclaimed home NOT already in outreach_log
+  const { data: alreadySent } = await supabase
+    .from("outreach_log")
+    .select("care_home_id");
+
+  const sentIds = (alreadySent || []).map((r) => r.care_home_id);
+
+  let query = supabase
+    .from("care_homes")
+    .select("id, name, town, county, service_type, bed_count, active_offer_level, ciw_rating_care_support, operator_name, email")
+    .ilike("county", `%${county}%`)
+    .eq("is_claimed", false)
+    .eq("is_active", true)
+    .not("email", "is", null);
+
+  if (sentIds.length > 0) {
+    // Filter out already contacted homes
+    query = query.not("id", "in", `(${sentIds.join(",")})`);
+  }
+
+  const { data: home } = await query.limit(1).single();
+
+  if (!home) {
+    await sendMessage(chatId, `No unsent unclaimed homes with email in "${county}".`);
+    return;
+  }
+
+  // Generate personalised email
+  const response = await askJSON<{
+    subject_cy: string;
+    subject_en: string;
+    body_cy: string;
+    body_en: string;
+  }>({
+    prompt: outreachEmailPrompt({
+      name: home.name as string,
+      town: home.town as string,
+      county: home.county as string,
+      service_type: home.service_type as string,
+      bed_count: home.bed_count as number | null,
+      active_offer_level: home.active_offer_level as number,
+      ciw_rating_care_support: home.ciw_rating_care_support as string | null,
+      operator_name: home.operator_name as string | null,
+    }),
+    system: SYSTEM_GOFAL,
+    tier: "standard",
+    maxTokens: 1024,
+  });
+
+  const d = response.data;
+  const subject = `${d.subject_cy} / ${d.subject_en}`;
+  const html = `
+    <div style="font-family: Nunito, Arial, sans-serif; max-width: 600px; color: #2C2430;">
+      <div style="margin-bottom: 24px;">${d.body_cy.replace(/\n/g, "<br>")}</div>
+      <hr style="border: none; border-top: 1px solid #DDD4CE; margin: 24px 0;">
+      <div style="color: #6B5C6B;">${d.body_en.replace(/\n/g, "<br>")}</div>
+    </div>`;
+
+  // Send via Gmail
+  const result = await sendEmail({
+    to: home.email as string,
+    subject,
+    html,
+  });
+
+  if (result.success) {
+    // Log to pipeline
+    await supabase.from("outreach_log").insert({
+      care_home_id: home.id,
+      email_to: home.email,
+      subject,
+      body_html: html,
+      status: "sent",
+    });
+
+    await sendMessage(chatId,
+      `✅ *Sent to ${home.name}*\n📩 ${home.email}\n📝 ${subject}\n\n_Logged to pipeline_`
+    );
+  } else {
+    await sendMessage(chatId, `❌ Failed to send: ${result.error}\n\nCheck GMAIL_ADDRESS and GMAIL_APP_PASSWORD in .env.local`);
+  }
+}
+
+// --- /pipeline — Show outreach funnel ---
+async function handlePipeline(chatId: number) {
+  const supabase = await createServiceClient();
+
+  const { data: logs } = await supabase
+    .from("outreach_log")
+    .select("status, care_home_id")
+    .order("sent_at", { ascending: false });
+
+  if (!logs?.length) {
+    await sendMessage(chatId, "📭 No outreach sent yet. Try `/send Cardiff` to get started.");
+    return;
+  }
+
+  const counts: Record<string, number> = {};
+  for (const log of logs) {
+    counts[log.status] = (counts[log.status] || 0) + 1;
+  }
+
+  const total = logs.length;
+  const funnel = [
+    `📧 Sent: *${counts["sent"] || 0}*`,
+    `👀 Opened: *${counts["opened"] || 0}*`,
+    `💬 Replied: *${counts["replied"] || 0}*`,
+    `✅ Claimed: *${counts["claimed"] || 0}*`,
+    `⭐ Upgraded: *${counts["upgraded"] || 0}*`,
+  ];
+
+  // Last 5 sent
+  const { data: recent } = await supabase
+    .from("outreach_log")
+    .select("email_to, status, sent_at, care_home_id")
+    .order("sent_at", { ascending: false })
+    .limit(5);
+
+  // Get care home names for recent
+  let recentLines = "";
+  if (recent?.length) {
+    const ids = recent.map((r) => r.care_home_id);
+    const { data: homes } = await supabase
+      .from("care_homes")
+      .select("id, name")
+      .in("id", ids);
+
+    const nameMap: Record<string, string> = {};
+    for (const h of homes || []) {
+      nameMap[h.id] = h.name;
+    }
+
+    recentLines = recent
+      .map((r) => {
+        const date = new Date(r.sent_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+        return `• ${nameMap[r.care_home_id] || "?"} — ${r.status} (${date})`;
+      })
+      .join("\n");
+  }
+
+  await sendMessage(chatId,
+    `📊 *Outreach Pipeline* (${total} total)\n\n${funnel.join("\n")}\n\n*Recent:*\n${recentLines}`
+  );
+}
+
+// --- /linkedin — Generate a LinkedIn post ---
+async function handleLinkedIn(chatId: number, topic?: string) {
+  await sendMessage(chatId, "✍️ Drafting LinkedIn post...");
+
+  const supabase = await createServiceClient();
+
+  const [
+    { count: totalHomes },
+    { count: claimed },
+  ] = await Promise.all([
+    supabase.from("care_homes").select("*", { count: "exact", head: true }).eq("is_active", true),
+    supabase.from("care_homes").select("*", { count: "exact", head: true }).eq("is_claimed", true),
+  ]);
+
+  const response = await ask({
+    prompt: `Write a LinkedIn post for Nathan Bowen, founder of gofal.wales.
+
+Platform stats: ${totalHomes} care homes listed across Wales, ${claimed} claimed.
+
+${topic ? `Topic: ${topic}` : "Pick a compelling topic from: the Active Offer, Welsh language in care, CIW ratings, finding care for a parent, what makes gofal.wales different."}
+
+Rules:
+- Write in English (LinkedIn audience)
+- Include 1-2 sentences in Welsh naturally (with translation)
+- Personal, authentic tone — Nathan is a Welsh speaker from Llanelli
+- Under 200 words
+- End with a question to drive engagement
+- Include 3-5 relevant hashtags
+- NO emojis in the first line (LinkedIn algorithm)`,
+    system: SYSTEM_GOFAL,
+    tier: "standard",
+    maxTokens: 512,
+    temperature: 0.7,
+  });
+
+  await sendMessage(chatId, `📝 *LinkedIn Draft:*\n\n${response.text}\n\n_Copy and paste to LinkedIn. Cost: $${response.costUsd.toFixed(4)}_`);
+}
+
+// --- Telegram alert helper (called from other API routes) ---
+export async function sendTelegramAlert(text: string) {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  if (!token || !chatId) return;
+
+  await fetch(`${TELEGRAM_API}${token}/sendMessage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      chat_id: chatId,
+      text,
+      parse_mode: "Markdown",
+    }),
+  });
+}
+
 export async function POST(request: NextRequest) {
   // Verify Telegram secret token
   const secretToken = request.headers.get("x-telegram-bot-api-secret-token");
@@ -451,9 +663,17 @@ export async function POST(request: NextRequest) {
     } else if (text.startsWith("/county") || text.startsWith("/sir")) {
       const county = text.split(" ").slice(1).join(" ").trim();
       await handleCountyBreakdown(chatId, county || undefined);
+    } else if (text.startsWith("/send ")) {
+      const county = text.split(" ").slice(1).join(" ").trim();
+      await handleSend(chatId, county);
     } else if (text.startsWith("/outreach")) {
       const county = text.split(" ").slice(1).join(" ").trim();
       await handleOutreach(chatId, county);
+    } else if (text === "/pipeline" || text === "/funnel") {
+      await handlePipeline(chatId);
+    } else if (text.startsWith("/linkedin")) {
+      const topic = text.split(" ").slice(1).join(" ").trim();
+      await handleLinkedIn(chatId, topic || undefined);
     } else if (text.startsWith("/lookup ") || text.startsWith("/home ")) {
       const query = text.split(" ").slice(1).join(" ").trim();
       await handleLookup(chatId, query);
@@ -478,7 +698,13 @@ export async function POST(request: NextRequest) {
 /data how many nursing homes? — AI queries the DB
 
 📧 *Outreach*
-/outreach Cardiff — Generate email for an unclaimed home
+/send Cardiff — Generate + send email from your Gmail
+/outreach Cardiff — Preview email without sending
+/pipeline — View outreach funnel
+
+📣 *Content*
+/linkedin — Generate a LinkedIn post
+/linkedin Active Offer — Post about a specific topic
 
 💬 *Chat*
 /ask [anything] — or just type freely
