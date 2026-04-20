@@ -111,7 +111,7 @@ export default function HomePage() {
                   </m.p>
                 </AnimatePresence>
               </div>
-              <m.h1 className="font-heading text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl" variants={fadeUp} transition={{ duration: 0.7 }}>
+              <m.h1 className="font-heading text-4xl font-bold leading-tight !text-white sm:text-5xl lg:text-6xl" variants={fadeUp} transition={{ duration: 0.7 }}>
                 {t("hero.title")}
               </m.h1>
               <m.p
