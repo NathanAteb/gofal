@@ -119,9 +119,9 @@ export default function HomePage() {
                 backgroundImage: "repeating-linear-gradient(135deg, #FBF7F3 0 12px, #F3EFE8 12px 13px)",
               }}
             >
-              {/* Existing WalesMap component — variant="hero" retained.
-                  For fuller editorial styling, see patches/03-WalesMap.tsx.md */}
-              <WalesMap countyCounts={countyCounts} variant="hero" />
+              {/* Editorial variant: ink paths on ivory, mono uppercase
+                  labels, coral hover, top-left county readout on hover. */}
+              <WalesMap countyCounts={countyCounts} variant="editorial" />
             </div>
             <div className="flex items-center justify-between border-t border-hairline px-5 py-3 font-mono text-[10px] uppercase tracking-[0.12em] text-ink-60">
               <span>{cyLabel("Hofer i archwilio", "Hover to explore")}</span>
@@ -132,7 +132,7 @@ export default function HomePage() {
 
         {/* Mobile map */}
         <div className="mt-10 lg:hidden" style={{ height: 320 }}>
-          <WalesMap countyCounts={countyCounts} variant="hero" />
+          <WalesMap countyCounts={countyCounts} variant="editorial" />
         </div>
 
         <style>{`

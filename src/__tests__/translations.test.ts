@@ -24,8 +24,13 @@ describe("translations", () => {
   });
 
   it("has all 22 county translations", () => {
-    const countyKeys = Object.keys(translations).filter((k) => k.startsWith("county."));
-    expect(countyKeys.length).toBe(22);
+    // Only count slug-shaped keys (county.<slug>), excluding the editorial
+    // homepage section keys (county.eyebrow, county.title, county.see_all).
+    const sectionKeys = new Set(["county.eyebrow", "county.title", "county.see_all"]);
+    const countySlugKeys = Object.keys(translations).filter(
+      (k) => k.startsWith("county.") && !sectionKeys.has(k)
+    );
+    expect(countySlugKeys.length).toBe(22);
   });
 
   it("does not contain CQC anywhere", () => {
