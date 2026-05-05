@@ -64,7 +64,6 @@ const HONEY = "#E5AD3E";
 const IVORY = "#FBF7F3";
 const BLUSH = "#DDD4CE";
 const DUSK = "#2C2430";
-const LAVENDER = "#A68AAB";
 
 const COPY = {
   en: {

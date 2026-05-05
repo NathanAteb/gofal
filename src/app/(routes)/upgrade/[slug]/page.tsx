@@ -86,7 +86,7 @@ export default async function UpgradePage({ params }: Props) {
           A managed bilingual page for {home.name} — £{GOFAL_PRO_MONTHLY_GBP}/month, no setup fee.
         </h2>
         <p style={{ fontSize: 16, lineHeight: 1.6, color: "#2C2430", marginTop: 18, maxWidth: 760 }}>
-          Eich rhestriad rhad ac am ddim wedi'i uwchraddio i dudalen llawn — wedi'i lenwi'n awtomatig
+          Eich rhestriad rhad ac am ddim wedi&rsquo;i uwchraddio i dudalen llawn — wedi&rsquo;i lenwi&rsquo;n awtomatig
           o ddata CIW, yn ddwyieithog, yn ymateb i ffôn, ac yn cael ei letya gan gofal.wales.
           {" "}
           <span style={{ color: "#6B5670" }}>
