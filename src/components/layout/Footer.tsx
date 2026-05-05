@@ -21,7 +21,7 @@ function LearnWelshToggle() {
 }
 
 export function Footer() {
-  const { locale, t } = useI18n();
+  const { locale } = useI18n();
 
   const columns: Array<{ title: string; links: Array<[string, string]> }> = [
     {

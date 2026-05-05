@@ -24,7 +24,7 @@ function DysguPill() {
 }
 
 export function Header() {
-  const { t, locale } = useI18n();
+  const { locale } = useI18n();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const navLinks = [
