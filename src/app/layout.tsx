@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Poppins, Nunito } from "next/font/google";
+import { Poppins, Nunito, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import { I18nProvider } from "@/lib/i18n/context";
 import { LearnWelshProvider } from "@/lib/i18n/learn-welsh";
 import { Header } from "@/components/layout/Header";
@@ -18,6 +18,21 @@ const nunito = Nunito({
   weight: ["400", "600", "700"],
   subsets: ["latin"],
   variable: "--font-nunito",
+  display: "swap",
+});
+
+const instrumentSerif = Instrument_Serif({
+  weight: ["400"],
+  style: ["normal", "italic"],
+  subsets: ["latin"],
+  variable: "--font-instrument-serif",
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  weight: ["400", "500", "700"],
+  subsets: ["latin"],
+  variable: "--font-jetbrains-mono",
   display: "swap",
 });
 
@@ -56,8 +71,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="cy" className={`${poppins.variable} ${nunito.variable}`}>
-      <body className="min-h-screen bg-ivory text-dusk antialiased">
+    <html
+      lang="cy"
+      className={`${poppins.variable} ${nunito.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable}`}
+    >
+      <body className="min-h-screen bg-ivory text-ink antialiased">
         <I18nProvider>
           <LearnWelshProvider>
             <Header />
