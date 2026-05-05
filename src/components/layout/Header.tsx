@@ -3,102 +3,121 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useI18n } from "@/lib/i18n/context";
-import { useLearnWelsh } from "@/lib/i18n/learn-welsh";
 import { LanguageToggle } from "./LanguageToggle";
-import { WelshWord } from "@/components/ui/WelshWord";
+import { useLearnWelsh } from "@/lib/i18n/learn-welsh";
 
-function LearnWelshButton() {
+function DysguPill() {
   const { enabled, toggle } = useLearnWelsh();
   return (
     <button
       onClick={toggle}
-      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-body font-semibold transition-colors ${
+      className={`inline-flex items-center gap-1.5 border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.12em] transition-colors ${
         enabled
-          ? "bg-accent/15 text-accent border border-accent/30"
-          : "bg-ivory text-muted-plum border border-blush-grey hover:border-accent hover:text-accent"
+          ? "border-honey bg-honey/15 text-honey"
+          : "border-hairline text-ink-60 hover:border-ink hover:text-ink"
       }`}
-      aria-label={enabled ? "Disable Welsh learning tooltips" : "Enable Welsh learning tooltips"}
       title="Dysgu Cymraeg / Learn Welsh"
     >
-      <span className="text-sm leading-none">📖</span>
-      Dysgu
+      <span>📖</span> Dysgu
     </button>
   );
 }
 
 export function Header() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const navLinks = [
-    { href: "/cartrefi-gofal", label: t("nav.directory"), en: "Care Homes" },
-    { href: "/canllawiau", label: t("nav.guides"), en: "Guides" },
-    { href: "/darparwyr", label: t("nav.providers"), en: "For Providers" },
-    { href: "/amdanom", label: t("nav.about"), en: "About Us" },
-    { href: "/cysylltu", label: t("nav.contact"), en: "Contact" },
+    { href: "/cartrefi-gofal", label: locale === "cy" ? "Cartrefi gofal" : "Care homes" },
+    { href: "/canllawiau", label: locale === "cy" ? "Canllawiau" : "Guides" },
+    { href: "/darparwyr", label: locale === "cy" ? "Darparwyr" : "Providers" },
   ];
 
   return (
-    <header className="sticky top-0 z-50 border-b border-blush-grey bg-white/95 backdrop-blur-sm">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
-        {/* Logo — clean text, no box */}
-        <Link href="/" className="text-xl font-heading font-bold tracking-tight">
-          <span className="text-dusk">gofal</span>
-          <span className="text-primary">.wales</span>
-        </Link>
-
-        {/* Desktop Nav */}
-        <nav className="hidden items-center gap-5 lg:gap-6 md:flex">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="whitespace-nowrap text-sm font-body font-semibold text-[#374151] transition-colors hover:text-primary"
-            >
-              <WelshWord en={link.en}>{link.label}</WelshWord>
-            </Link>
-          ))}
-          <LearnWelshButton />
+    <>
+      {/* Utility strip */}
+      <div className="hidden md:flex h-8 items-center justify-between bg-ink px-10 font-mono text-[11px] uppercase tracking-[0.08em] text-white/70">
+        <span>◉ {locale === "cy" ? "Cyfeiriadur cartrefi gofal Cymru" : "Wales' care home directory"}</span>
+        <div className="flex items-center gap-5">
           <LanguageToggle />
-        </nav>
-
-        {/* Mobile menu button */}
-        <button
-          onClick={() => setMobileOpen(!mobileOpen)}
-          className="flex h-10 w-10 items-center justify-center rounded-lg text-dusk md:hidden"
-          aria-label={mobileOpen ? "Close menu" : "Open menu"}
-        >
-          {mobileOpen ? (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M18 6L6 18M6 6l12 12" />
-            </svg>
-          ) : (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M3 12h18M3 6h18M3 18h18" />
-            </svg>
-          )}
-        </button>
+          <span className="text-white/30">|</span>
+          <DysguPill />
+        </div>
       </div>
 
-      {/* Mobile Nav */}
-      {mobileOpen && (
-        <nav className="border-t border-blush-grey bg-white px-4 pb-4 md:hidden">
-          {navLinks.map((link) => (
+      {/* Main nav */}
+      <header className="sticky top-0 z-50 border-b border-hairline bg-ivory/95 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-10">
+          <Link
+            href="/"
+            className="font-display text-3xl leading-none tracking-tight text-ink"
+          >
+            gofal<span className="italic text-heather">.</span>wales
+          </Link>
+
+          {/* Desktop nav */}
+          <nav className="hidden md:flex items-center gap-9">
+            {navLinks.map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                className="font-body text-[14px] font-semibold text-ink transition-colors hover:text-heather"
+              >
+                {l.label}
+              </Link>
+            ))}
             <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => setMobileOpen(false)}
-              className="block py-3 text-base font-body font-semibold text-[#374151] transition-colors hover:text-primary"
+              href="/cymorth"
+              className="inline-flex items-center gap-2 bg-coral px-5 py-2.5 font-body text-[13px] font-bold uppercase tracking-wider text-white transition-colors hover:bg-[#A0522D]"
             >
-              {link.label}
+              {locale === "cy" ? "Cael cymorth" : "Get help"} <span aria-hidden>→</span>
             </Link>
-          ))}
-          <div className="flex items-center gap-3 pt-2">
-            <LearnWelshButton />
-            <LanguageToggle />
-          </div>
-        </nav>
-      )}
-    </header>
+          </nav>
+
+          {/* Mobile toggle */}
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="flex h-10 w-10 items-center justify-center text-ink md:hidden"
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+          >
+            {mobileOpen ? (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 12h18M3 6h18M3 18h18" />
+              </svg>
+            )}
+          </button>
+        </div>
+
+        {mobileOpen && (
+          <nav className="border-t border-hairline bg-ivory px-6 pb-5 md:hidden">
+            {navLinks.map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                onClick={() => setMobileOpen(false)}
+                className="block py-3 font-body text-base font-semibold text-ink"
+              >
+                {l.label}
+              </Link>
+            ))}
+            <Link
+              href="/cymorth"
+              onClick={() => setMobileOpen(false)}
+              className="mt-3 inline-flex items-center gap-2 bg-coral px-5 py-2.5 font-body text-[13px] font-bold uppercase tracking-wider text-white"
+            >
+              {locale === "cy" ? "Cael cymorth" : "Get help"} →
+            </Link>
+            <div className="mt-4 flex items-center gap-3">
+              <LanguageToggle />
+              <DysguPill />
+            </div>
+          </nav>
+        )}
+      </header>
+    </>
   );
 }
