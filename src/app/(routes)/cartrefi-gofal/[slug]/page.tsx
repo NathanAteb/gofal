@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCountyBySlug, counties } from "@/lib/utils/counties";
 import { CareHomeProfile } from "./CareHomeProfile";
 import { CountyPage } from "./CountyPage";
+import { ProPage } from "@/components/gofal-pro/ProPage";
 import type { Metadata } from "next";
 
 // ISR: revalidate every 24 hours
@@ -72,6 +73,52 @@ export default async function DynamicPage({ params }: Props) {
       .single();
 
     if (!home) notFound();
+
+    // Tier-aware render: if there's an active Gofal Pro subscription, render
+    // the managed Pro template populated from CIW data + customer overrides.
+    // Otherwise fall through to the existing free CareHomeProfile.
+    const { data: subscription } = await supabase
+      .from("gofal_subscriptions")
+      .select(
+        "id, custom_subdomain, custom_domain, welsh_medium_declared, welsh_medium_verified_at, welsh_medium_deployment_notes, tier, status"
+      )
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .eq("ciw_service_id", (home as any).ciw_service_id)
+      .eq("status", "active")
+      .eq("tier", "pro")
+      .maybeSingle();
+
+    if (subscription) {
+      const [{ data: content }, { data: photos }] = await Promise.all([
+        supabase
+          .from("gofal_page_content")
+          .select(
+            "hero_intro_en, hero_intro_cy, services_description_en, services_description_cy, contact_name, contact_phone, contact_email, logo_url, primary_colour"
+          )
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .eq("subscription_id", (subscription as any).id)
+          .maybeSingle(),
+        supabase
+          .from("gofal_page_photos")
+          .select("id, photo_url, alt_text_en, alt_text_cy, display_order")
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .eq("subscription_id", (subscription as any).id)
+          .order("display_order", { ascending: true }),
+      ]);
+
+      return (
+        <ProPage
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          home={home as any}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          subscription={subscription as any}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          content={(content as any) ?? null}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          photos={((photos as any[]) ?? [])}
+        />
+      );
+    }
 
     const { data: related } = await supabase
       .from("care_homes")
