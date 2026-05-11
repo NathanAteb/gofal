@@ -3,20 +3,17 @@
 import Link from "next/link";
 import { useI18n } from "@/lib/i18n/context";
 import { useLearnWelsh } from "@/lib/i18n/learn-welsh";
-import { counties } from "@/lib/utils/counties";
 
 function LearnWelshToggle() {
   const { enabled, toggle } = useLearnWelsh();
   const { locale } = useI18n();
-
   return (
     <button
       onClick={toggle}
-      className="inline-flex items-center gap-2 rounded-full border border-primary-light/30 px-3 py-1.5 text-xs text-white/70 transition-colors hover:bg-primary-light/10 hover:text-white"
-      aria-label={enabled ? "Disable Welsh learning tooltips" : "Enable Welsh learning tooltips"}
+      className="inline-flex items-center gap-2 border border-white/20 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-white/60 transition-colors hover:text-white"
     >
-      <span className={`relative inline-block h-4 w-7 rounded-full transition-colors ${enabled ? "bg-accent" : "bg-primary-light/30"}`}>
-        <span className={`absolute top-0.5 h-3 w-3 rounded-full bg-white transition-transform ${enabled ? "translate-x-3.5" : "translate-x-0.5"}`} />
+      <span className={`relative inline-block h-3.5 w-6 rounded-full transition-colors ${enabled ? "bg-honey" : "bg-white/20"}`}>
+        <span className={`absolute top-0.5 h-2.5 w-2.5 rounded-full bg-white transition-transform ${enabled ? "translate-x-3" : "translate-x-0.5"}`} />
       </span>
       {locale === "cy" ? "Dysgu Cymraeg" : "Learn Welsh"}
     </button>
@@ -24,141 +21,83 @@ function LearnWelshToggle() {
 }
 
 export function Footer() {
-  const { locale, t } = useI18n();
+  const { locale } = useI18n();
+
+  const columns: Array<{ title: string; links: Array<[string, string]> }> = [
+    {
+      title: locale === "cy" ? "Chwilio" : "Find",
+      links: [
+        [locale === "cy" ? "Pob cartref" : "All homes", "/cartrefi-gofal"],
+        [locale === "cy" ? "Yn ôl sir" : "By county", "/cartrefi-gofal"],
+        [locale === "cy" ? "Yn ôl math" : "By care type", "/cartrefi-gofal"],
+        [locale === "cy" ? "Siaradwyr Cymraeg" : "Welsh-speaking", "/cartrefi-gofal?welsh=1"],
+      ],
+    },
+    {
+      title: locale === "cy" ? "Dysgu" : "Learn",
+      links: [
+        [locale === "cy" ? "Canllawiau" : "Guides", "/canllawiau"],
+        [locale === "cy" ? "Graddfeydd CIW" : "CIW ratings", "/canllawiau/ciw"],
+        [locale === "cy" ? "Cynnig Rhagweithiol" : "Active Offer", "/canllawiau/cynnig-rhagweithiol"],
+        [locale === "cy" ? "Ariannu" : "Funding", "/canllawiau/ariannu"],
+      ],
+    },
+    {
+      title: locale === "cy" ? "I ddarparwyr" : "For providers",
+      links: [
+        [locale === "cy" ? "Hawlio eich cartref" : "Claim your listing", "/hawlio"],
+        [locale === "cy" ? "Proffil estynedig" : "Enhanced profile", "/darparwyr"],
+        [locale === "cy" ? "Prisiau" : "Pricing", "/darparwyr#prisiau"],
+        [locale === "cy" ? "Cysylltu" : "Contact sales", "/cysylltu"],
+      ],
+    },
+    {
+      title: "Ateb AI",
+      links: [
+        [locale === "cy" ? "Amdanom ni" : "About", "/amdanom"],
+        ["Llanelli, Cymru", "/amdanom"],
+        ["hello@gofal.wales", "mailto:hello@gofal.wales"],
+        ["© MMXXVI", "/"],
+      ],
+    },
+  ];
 
   return (
-    <footer className="border-t border-blush-grey bg-primary-dark text-white">
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Brand */}
-          <div>
-            <Link href="/" className="text-xl font-heading font-bold">
-              gofal<span className="text-secondary">.wales</span>
-            </Link>
-            <p className="mt-3 text-sm text-white/70 leading-relaxed">
-              {t("footer.description")}
-            </p>
-            <p className="mt-2 text-xs text-white/50">
-              {t("footer.built_by")}
-            </p>
-            <a href="mailto:hello@gofal.wales" className="mt-3 inline-block text-sm text-white/70 hover:text-white transition-colors">
-              hello@gofal.wales
-            </a>
-            <div className="mt-3 flex gap-3">
-              <a href="https://linkedin.com/company/gofal-wales" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-white transition-colors" aria-label="LinkedIn">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-              </a>
-              <a href="https://twitter.com/gofalwales" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-white transition-colors" aria-label="X / Twitter">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-              </a>
+    <footer className="relative overflow-hidden bg-ink text-white">
+      <div className="grid gap-10 border-b border-white/10 px-6 pb-10 pt-14 lg:grid-cols-4 lg:px-10">
+        {columns.map((col) => (
+          <div key={col.title}>
+            <div className="mb-4 font-mono text-[10px] uppercase tracking-[0.15em] text-white/50">
+              {col.title}
             </div>
-          </div>
-
-          {/* Directory - Counties */}
-          <div>
-            <h3 className="font-heading font-bold text-sm uppercase tracking-wider text-white">
-              {t("footer.directory")}
-            </h3>
-            <ul className="mt-3 space-y-1.5">
-              {counties.slice(0, 11).map((county) => (
-                <li key={county.slug}>
+            <ul className="space-y-2 font-body text-sm">
+              {col.links.map(([label, href]) => (
+                <li key={label}>
                   <Link
-                    href={`/cartrefi-gofal/${county.slug}`}
-                    className="text-sm text-white/70 transition-colors hover:text-white"
+                    href={href}
+                    className="text-white/85 transition-colors hover:text-white"
                   >
-                    {locale === "cy" ? county.name_cy : county.name_en}
+                    {label}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
+        ))}
+      </div>
 
-          <div>
-            <h3 className="font-body font-semibold text-[13px] uppercase tracking-[0.08em] text-white/60">
-              {locale === "cy" ? "Siroedd eraill" : "More counties"}
-            </h3>
-            <ul className="mt-3 space-y-1.5">
-              {counties.slice(11).map((county) => (
-                <li key={county.slug}>
-                  <Link
-                    href={`/cartrefi-gofal/${county.slug}`}
-                    className="text-sm text-white/70 transition-colors hover:text-white"
-                  >
-                    {locale === "cy" ? county.name_cy : county.name_en}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+      {/* Oversized wordmark */}
+      <div
+        className="overflow-hidden whitespace-nowrap px-5 pb-5 pt-10 font-display font-normal leading-[0.82] tracking-[-0.05em]"
+        style={{ fontSize: "clamp(160px, 22vw, 300px)" }}
+      >
+        gofal<span className="italic text-heather">.</span>wales
+      </div>
 
-          {/* Information & Legal */}
-          <div>
-            <h3 className="font-heading font-bold text-sm uppercase tracking-wider text-white">
-              {t("footer.information")}
-            </h3>
-            <ul className="mt-3 space-y-1.5">
-              <li>
-                <Link href="/canllawiau" className="text-sm text-white/70 transition-colors hover:text-white">
-                  {t("nav.guides")}
-                </Link>
-              </li>
-              <li>
-                <Link href="/darparwyr" className="text-sm text-white/70 transition-colors hover:text-white">
-                  {t("nav.providers")}
-                </Link>
-              </li>
-              <li>
-                <Link href="/amdanom" className="text-sm text-white/70 transition-colors hover:text-white">
-                  {t("nav.about")}
-                </Link>
-              </li>
-              <li>
-                <Link href="/cysylltu" className="text-sm text-white/70 transition-colors hover:text-white">
-                  {t("nav.contact")}
-                </Link>
-              </li>
-            </ul>
-
-            <h3 className="mt-6 font-heading font-bold text-sm uppercase tracking-wider text-white">
-              {t("footer.legal")}
-            </h3>
-            <ul className="mt-3 space-y-1.5">
-              <li>
-                <Link href="/preifatrwydd" className="text-sm text-white/70 transition-colors hover:text-white">
-                  {t("footer.privacy")}
-                </Link>
-              </li>
-              <li>
-                <Link href="/telerau" className="text-sm text-white/70 transition-colors hover:text-white">
-                  {t("footer.terms")}
-                </Link>
-              </li>
-              <li>
-                <Link href="/cwcis" className="text-sm text-white/70 transition-colors hover:text-white">
-                  {t("footer.cookies")}
-                </Link>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        {/* Data attribution + trust */}
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-4 text-[11px] text-white/40">
-          <span>Data: Arolygiaeth Gofal Cymru (OGL v3.0)</span>
-          <span>·</span>
-          <a href="https://www.trustpilot.com/review/gofal.wales" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-white">
-            {locale === "cy" ? "Graddiwch ni ar Trustpilot" : "Rate us on Trustpilot"} &rarr;
-          </a>
-        </div>
-
-        <p className="mt-6 text-center italic text-[13px]" style={{ color: "rgba(255,255,255,0.4)" }}>
-          Mae gofal yn iawn.
-        </p>
-
-        <div className="mt-6 border-t border-white/20 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/50">
-          <span>{t("footer.copyright")}</span>
-          <LearnWelshToggle />
-        </div>
+      <div className="flex flex-wrap items-center justify-between gap-4 px-6 pb-8 font-mono text-[10px] uppercase tracking-[0.12em] text-white/40 lg:px-10">
+        <span>{locale === "cy" ? "Cymraeg yn gyntaf · Welsh first" : "Welsh first · Cymraeg yn gyntaf"}</span>
+        <LearnWelshToggle />
+        <span>{locale === "cy" ? "Adeiladwyd yn Llanelli, Cymru" : "Built in Llanelli, Cymru"}</span>
       </div>
     </footer>
   );

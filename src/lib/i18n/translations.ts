@@ -541,6 +541,49 @@ const translations = {
     cy: "Porwch drwy bob cartref gofal yng Nghymru. Cymharwch graddfeydd CIW, prisiau, a darpariaeth Gymraeg.",
     en: "Browse every care home in Wales. Compare CIW ratings, prices, and Welsh language provision.",
   },
+
+  // Editorial homepage (PR3 of editorial-redesign handoff)
+  "hero.eyebrow": { cy: "001 / Cartref", en: "001 / Home" },
+  "hero.established": {
+    cy: "Est. Llanelli, Cymru — MMXXVI",
+    en: "Est. Llanelli, Cymru — MMXXVI",
+  },
+  "hero.search_cta": { cy: "Chwilio", en: "Search" },
+  "hero.stat_homes": { cy: "Cartrefi gofal", en: "Care homes" },
+  "hero.stat_counties": { cy: "Siroedd", en: "Counties" },
+  "hero.stat_free": { cy: "Am ddim", en: "Free" },
+  "hero.stat_free_sub": { cy: "I deuluoedd", en: "For families" },
+  "how.eyebrow": {
+    cy: "002 / Sut mae'n gweithio",
+    en: "002 / How it works",
+  },
+  "how.title_pre": { cy: "Tri cham.", en: "Three steps." },
+  "how.title_post": { cy: "Dim ceidwaid.", en: "No gatekeepers." },
+  "story.eyebrow": {
+    cy: "003 / Pam gofal.wales?",
+    en: "003 / Why gofal.wales?",
+  },
+  "story.title_pre": {
+    cy: "Roedd dod o hyd i ofal Cymraeg yn",
+    en: "Finding Welsh-language care was",
+  },
+  "story.title_accent": { cy: "hunllef.", en: "a nightmare." },
+  "county.eyebrow": {
+    cy: "004 / Porwch yn ôl sir",
+    en: "004 / Browse by county",
+  },
+  "county.title": { cy: "Pob 22 sir.", en: "All 22 counties." },
+  "county.see_all": {
+    cy: "Gweld pob cartref",
+    en: "See every home",
+  },
+  "cta.eyebrow": { cy: "005 / Barod?", en: "005 / Ready?" },
+  "cta.title_pre": {
+    cy: "Dewch o hyd i'r cartref iawn.",
+    en: "Find the right home.",
+  },
+  // Welsh italic in BOTH locales by spec (gofal differentiator)
+  "cta.title_post": { cy: "Yn Gymraeg.", en: "Yn Gymraeg." },
 } as const;
 
 export type TranslationKey = keyof typeof translations;

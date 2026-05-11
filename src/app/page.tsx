@@ -2,48 +2,26 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { AnimatePresence } from "motion/react";
-import * as m from "motion/react-client";
 import { useI18n } from "@/lib/i18n/context";
-
-const HERO_TAGLINES = [
-  "Cartref yw cartref.",
-  "Cymorth i bawb.",
-  "Gyda'n gilydd.",
-  "Mae gofal yn iawn.",
-  "Lle mae'r galon.",
-];
 import { SearchBar } from "@/components/forms/SearchBar";
 import { WalesMap } from "@/components/maps/WalesMap";
-import { WelshWord } from "@/components/ui/WelshWord";
 import { counties } from "@/lib/utils/counties";
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0 },
-};
-const fadeIn = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1 },
-};
-const scaleIn = {
-  hidden: { opacity: 0, scale: 0.9 },
-  visible: { opacity: 1, scale: 1 },
-};
-const staggerChildren = {
-  visible: { transition: { staggerChildren: 0.12 } },
-};
+const WELSH_NOUNS: Array<{ cy: string; en: string }> = [
+  { cy: "cartref", en: "home" },
+  { cy: "gofal", en: "care" },
+  { cy: "teulu", en: "family" },
+  { cy: "cymuned", en: "community" },
+];
 
 export default function HomePage() {
   const { locale, t } = useI18n();
   const [countyCounts, setCountyCounts] = useState<Record<string, number>>({});
-  const [taglineIndex, setTaglineIndex] = useState(0);
+  const [wordIdx, setWordIdx] = useState(0);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTaglineIndex((prev) => (prev + 1) % HERO_TAGLINES.length);
-    }, 6000);
-    return () => clearInterval(interval);
+    const i = setInterval(() => setWordIdx((x) => (x + 1) % WELSH_NOUNS.length), 2600);
+    return () => clearInterval(i);
   }, []);
 
   useEffect(() => {
@@ -51,17 +29,17 @@ export default function HomePage() {
       fetch(`/api/search?county=${c.slug}&per_page=1`)
         .then((r) => r.json())
         .then((d) => {
-          if (d.total > 0) {
-            setCountyCounts((prev) => ({ ...prev, [c.slug]: d.total }));
-          }
+          if (d.total > 0) setCountyCounts((p) => ({ ...p, [c.slug]: d.total }));
         })
         .catch(() => {});
     });
   }, []);
 
+  const word = WELSH_NOUNS[wordIdx];
+  const cyLabel = (cy: string, en: string) => (locale === "cy" ? cy : en);
+
   return (
     <>
-      {/* JSON-LD */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -71,305 +49,287 @@ export default function HomePage() {
             name: "gofal.wales",
             url: "https://gofal.wales",
             description: t("meta.home_description"),
-            potentialAction: {
-              "@type": "SearchAction",
-              target: "https://gofal.wales/cartrefi-gofal?q={search_term_string}",
-              "query-input": "required name=search_term_string",
-            },
           }),
         }}
       />
 
-      {/* ── 1. HERO ── Two-column: text left, map right */}
-      <section
-        className="relative py-16 pb-28 text-white sm:py-20 sm:pb-36 lg:py-24 lg:pb-28"
-        style={{ background: "linear-gradient(135deg, #4A2F4E 0%, #7B5B7E 40%, #A68AAB 70%, #7B5B7E 100%)" }}
-      >
-        <div className="absolute inset-0 overflow-hidden">
-          <m.div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-white/5" animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }} />
-          <m.div className="absolute -bottom-32 -left-32 h-[500px] w-[500px] rounded-full bg-white/5" animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }} />
+      {/* ── 1. HERO — editorial ivory ── */}
+      <section className="relative bg-ivory px-6 pb-20 pt-12 lg:px-16">
+        <div className="mb-9 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.15em] text-ink-60">
+          <span>001 / {cyLabel("Cartref", "Home")}</span>
+          <span>Est. Llanelli, Cymru — MMXXVI</span>
         </div>
 
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="grid items-center gap-10 lg:grid-cols-[55%_45%]">
-
-            {/* Left column: text + search */}
-            <m.div initial="hidden" animate="visible" variants={staggerChildren}>
-              {/* Rotating Welsh tagline */}
-              <div className="h-7 mb-3">
-                <AnimatePresence mode="wait">
-                  <m.p
-                    key={taglineIndex}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    transition={{ duration: 0.5 }}
-                    className="text-[14px] italic text-white/50 tracking-wide"
-                    style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
-                  >
-                    {HERO_TAGLINES[taglineIndex]}
-                  </m.p>
-                </AnimatePresence>
-              </div>
-              <m.h1 className="font-heading text-4xl font-bold leading-tight !text-white sm:text-5xl lg:text-6xl" variants={fadeUp} transition={{ duration: 0.7 }}>
-                {t("hero.title")}
-              </m.h1>
-              <m.p
-                className="mt-4 max-w-[480px] font-body font-normal text-white/[0.92]"
-                style={{ fontSize: "20px", letterSpacing: "0.01em", lineHeight: 1.5 }}
-                variants={fadeUp}
-                transition={{ duration: 0.7 }}
-              >
-                {locale === "cy" ? "Dod o hyd i ofal Cymraeg — am ddim." : "Find Welsh-language care. Free."}
-              </m.p>
-              <m.div className="mt-8 max-w-xl" variants={fadeUp} transition={{ duration: 0.7 }}>
-                <SearchBar size="lg" />
-              </m.div>
-              <m.div className="mt-5" variants={fadeIn} transition={{ duration: 0.5, delay: 0.6 }}>
-                <Link
-                  href="/cymorth"
-                  className="inline-flex items-center gap-2 rounded-full border-2 border-white/50 px-6 py-2.5 font-body font-semibold text-white transition-colors hover:bg-white hover:text-dusk"
+        <div className="grid items-start gap-16 lg:grid-cols-[minmax(0,1fr)_520px]">
+          <div>
+            <h1 className="font-display text-[clamp(72px,9vw,148px)] font-normal leading-[0.92] tracking-[-0.03em] text-ink">
+              {cyLabel("Mae ", "Finding ")}
+              <span className="relative inline-block min-w-[3ch]">
+                <span
+                  key={wordIdx}
+                  className="inline-block italic text-heather"
+                  style={{ animation: "wordSwap 500ms cubic-bezier(.2,.8,.2,1)" }}
                 >
-                  {locale === "cy" ? "Neu cewch gymorth gan ein tîm" : "Or get help from our team"}
-                  <span aria-hidden="true">&rarr;</span>
-                </Link>
-              </m.div>
-            </m.div>
+                  {word.cy}
+                </span>
+              </span>
+              <br />
+              <span className="tracking-[-0.04em]">
+                {cyLabel("yn iawn.", "is okay.")}
+              </span>
+            </h1>
+            <p className="mt-8 max-w-[480px] text-[20px] leading-[1.5] text-ink">
+              {locale === "cy"
+                ? <>Pob cartref gofal rheoleiddiedig yng Nghymru — <i>/{word.cy}/</i> chwiliadwy, cymharadwy, ac am ddim i deuluoedd bob amser.</>
+                : <>Every regulated care home in Wales — <i>/{word.en}/</i> searchable, comparable, and always free for families.</>}
+            </p>
 
-            {/* Right column: Wales map */}
-            <m.div
-              className="hidden md:flex flex-col items-center justify-center"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-            >
-              <p className="mb-4 text-center font-body text-sm font-normal text-white/70">
-                {locale === "cy" ? "Porwch yn ôl sir" : "Browse by county"}
-              </p>
-              <WalesMap countyCounts={countyCounts} variant="hero" />
-            </m.div>
-          </div>
-
-          {/* Mobile: map below text, 280px */}
-          <m.div
-            className="mt-10 md:hidden"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-          >
-            <div className="mx-auto" style={{ height: "280px" }}>
-              <WalesMap countyCounts={countyCounts} variant="hero" />
+            <div className="mt-9 max-w-[560px]">
+              <SearchBar size="lg" />
             </div>
-          </m.div>
+
+            <div className="mt-14 grid max-w-md grid-cols-3 gap-10 border-t border-hairline pt-5 font-mono text-[11px] uppercase tracking-[0.08em]">
+              <div>
+                <div className="font-display text-[36px] normal-case leading-none tracking-[-0.02em] text-ink">1,024</div>
+                <div className="mt-1.5 text-ink-60">{cyLabel("Cartrefi gofal", "Care homes")}</div>
+              </div>
+              <div>
+                <div className="font-display text-[36px] normal-case leading-none tracking-[-0.02em] text-ink">22</div>
+                <div className="mt-1.5 text-ink-60">{cyLabel("Siroedd", "Counties")}</div>
+              </div>
+              <div>
+                <div className="font-display text-[36px] normal-case italic leading-none tracking-[-0.02em] text-ink">{cyLabel("Am ddim", "Free")}</div>
+                <div className="mt-1.5 text-ink-60">{cyLabel("I deuluoedd", "For families")}</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Interactive map card */}
+          <aside className="sticky top-24 hidden overflow-hidden border border-hairline bg-white lg:block">
+            <div className="flex items-center justify-between border-b border-hairline px-5 py-3.5 font-mono text-[10px] uppercase tracking-[0.12em] text-ink-60">
+              <span className="inline-flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#4ADE80]" /> Live · {cyLabel("Porwch yn ôl sir", "Browse by county")}
+              </span>
+              <span>22 {cyLabel("siroedd", "counties")}</span>
+            </div>
+            <div
+              className="p-6"
+              style={{
+                height: 480,
+                backgroundImage: "repeating-linear-gradient(135deg, #FBF7F3 0 12px, #F3EFE8 12px 13px)",
+              }}
+            >
+              {/* Editorial variant: ink paths on ivory, mono uppercase
+                  labels, coral hover, top-left county readout on hover. */}
+              <WalesMap countyCounts={countyCounts} variant="editorial" />
+            </div>
+            <div className="flex items-center justify-between border-t border-hairline px-5 py-3 font-mono text-[10px] uppercase tracking-[0.12em] text-ink-60">
+              <span>{cyLabel("Hofer i archwilio", "Hover to explore")}</span>
+              <span>{cyLabel("Cliciwch i fynd", "Click to enter")} →</span>
+            </div>
+          </aside>
         </div>
+
+        {/* Mobile map */}
+        <div className="mt-10 lg:hidden" style={{ height: 320 }}>
+          <WalesMap countyCounts={countyCounts} variant="editorial" />
+        </div>
+
+        <style>{`
+          @keyframes wordSwap {
+            0% { opacity: 0; transform: translateY(16px); filter: blur(4px); }
+            100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+          }
+        `}</style>
       </section>
 
-      {/* ── 2. STATS ── White bg */}
-      <section className="-mt-8 relative z-10 mx-auto max-w-5xl px-4 sm:px-6">
-        <m.div className="grid grid-cols-2 gap-4 sm:grid-cols-4" initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={staggerChildren}>
+      {/* ── 2. TRUST STRIP ── */}
+      <section className="flex flex-wrap items-center justify-center gap-6 bg-ink px-6 py-4 font-mono text-[12px] uppercase tracking-[0.12em] text-white">
+        <span className="text-[#4ADE80]">✓</span>
+        <span>{cyLabel("Am ddim i deuluoedd — bob amser", "Free for families — always")}</span>
+        <span className="text-white/30">·</span>
+        <span>{cyLabel("Data CIW wedi'i ddiweddaru'n wythnosol", "CIW data updated weekly")}</span>
+        <span className="text-white/30">·</span>
+        <span>{cyLabel("Cymraeg yn gyntaf, cy_GB yw'r rhagosodiad", "Welsh-first, cy_GB default")}</span>
+      </section>
+
+      {/* ── 3. HOW IT WORKS ── */}
+      <section className="border-t border-hairline bg-ivory px-6 py-28 lg:px-16">
+        <div className="mb-14">
+          <div className="mb-3 font-mono text-[11px] uppercase tracking-[0.15em] text-ink-60">
+            002 / {cyLabel("Sut mae'n gweithio", "How it works")}
+          </div>
+          <h2 className="font-display text-[88px] font-normal leading-[0.95] tracking-[-0.03em] text-ink">
+            {cyLabel("Tri cham.", "Three steps.")}
+            <br />
+            <span className="italic text-heather">{cyLabel("Dim ceidwaid.", "No gatekeepers.")}</span>
+          </h2>
+        </div>
+
+        <div className="grid border-t border-ink lg:grid-cols-3">
           {[
-            { value: "1,000+", label: locale === "cy" ? "Cartref gofal" : "Care homes", sub: locale === "cy" ? "Ar draws Cymru gyfan" : "Across all of Wales", en: "Care homes" },
-            { value: "22", label: locale === "cy" ? "Sir" : "Counties", sub: locale === "cy" ? "Pob sir yng Nghymru" : "Every Welsh county", en: "Counties" },
-            { value: locale === "cy" ? "Am ddim" : "Free", label: locale === "cy" ? "I deuluoedd" : "For families", sub: locale === "cy" ? "Bob amser, dim tâl" : "Always, no charge", en: "For families" },
-            { value: locale === "cy" ? "Cymraeg" : "Welsh", label: locale === "cy" ? "Yn gyntaf" : "First", sub: locale === "cy" ? "Yr unig gyfeiriadur Cymraeg" : "The only Welsh directory", en: "First" },
-          ].map((stat) => (
-            <m.div
-              key={stat.label}
-              className="rounded-[16px] border border-blush-grey bg-white p-4 text-center shadow-card"
-              variants={scaleIn}
-              transition={{ duration: 0.5 }}
-              whileHover={{ y: -4, boxShadow: "0 20px 60px rgba(44,36,48,0.12)" }}
+            {
+              n: "01",
+              t: cyLabel("Chwilio", "Search"),
+              d: locale === "cy"
+                ? "Chwiliwch yn ôl lleoliad, math o ofal, neu Gymraeg. Mae pob cartref gofal rheoleiddiedig ar y rhestr — dim byd y tu ôl i dâl."
+                : "Search by location, care type, or Welsh-language provision. Every regulated care home in Wales is listed — nothing paywalled.",
+            },
+            {
+              n: "02",
+              t: cyLabel("Cymharu", "Compare"),
+              d: locale === "cy"
+                ? "Graddfeydd arolygu CIW ar draws pedair thema, lefel y Cynnig Rhagweithiol, ffioedd wythnosol, a gwasanaethau — ochr yn ochr."
+                : "CIW inspection ratings across four themes, Active Offer level, weekly fees, and services — side by side.",
+            },
+            {
+              n: "03",
+              t: cyLabel("Cysylltu", "Connect"),
+              d: locale === "cy"
+                ? "Ymholwch yn uniongyrchol, neu cewch gymorth gan ein tîm os yw'r broses yn teimlo'n llethol. Am ddim i deuluoedd bob amser."
+                : "Enquire directly, or get help from our team if the process feels overwhelming. Always free for families.",
+            },
+          ].map((s, i) => (
+            <div
+              key={s.n}
+              className={`px-9 pb-10 pt-8 ${i < 2 ? "lg:border-r lg:border-hairline" : ""}`}
             >
-              <p className="font-heading text-2xl font-bold text-primary sm:text-3xl">{stat.value}</p>
-              <p className="mt-0.5 text-sm font-semibold text-dusk">
-                <WelshWord en={stat.en}>{stat.label}</WelshWord>
-              </p>
-              <p className="mt-0.5 text-[11px] text-muted-plum">{stat.sub}</p>
-            </m.div>
+              <div className="font-mono text-[12px] uppercase tracking-[0.15em] text-ink-60">{s.n}</div>
+              <div className="mt-4 font-display text-[52px] leading-none tracking-[-0.02em] text-ink">{s.t}</div>
+              <p className="mt-5 max-w-[340px] text-[16px] leading-[1.6] text-ink">{s.d}</p>
+            </div>
           ))}
-        </m.div>
-      </section>
-
-      {/* ── 3. HOW IT WORKS ── Ivory bg */}
-      <section className="bg-ivory py-16 sm:py-24">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6">
-          <m.h2 className="text-center font-heading text-3xl font-bold sm:text-4xl" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} transition={{ duration: 0.6 }}>
-            <WelshWord en="How it works">{t("how.title")}</WelshWord>
-          </m.h2>
-          <m.div className="mt-12 grid gap-8 sm:grid-cols-3" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerChildren}>
-            {[
-              {
-                icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></svg>,
-                title: t("how.step1.title"), title_en: "Search",
-                desc: locale === "cy"
-                  ? "Chwiliwch yn ôl lleoliad, math o ofal, neu ba gartrefi sy'n cynnig gofal Cymraeg. Mae pob cartref gofal yng Nghymru ar y cyfeiriadur hwn."
-                  : "Search by location, care type, or Welsh language provision. Every regulated care home in Wales is listed here.",
-              },
-              {
-                icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /></svg>,
-                title: t("how.step2.title"), title_en: "Compare",
-                desc: locale === "cy"
-                  ? "Cymharwch raddfeydd CIW ar draws pedair thema, lefel y Cynnig Rhagweithiol, prisiau wythnosol, a gwasanaethau — ochr yn ochr."
-                  : "Compare CIW inspection ratings across four themes, Active Offer level, weekly fees, and services — side by side.",
-              },
-              {
-                icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" /></svg>,
-                title: t("how.step3.title"), title_en: "Connect",
-                desc: locale === "cy"
-                  ? "Anfonwch ymholiad yn uniongyrchol i'r cartref gofal, neu cewch gymorth gan ein tîm os yw'r broses yn teimlo'n llethol."
-                  : "Send an enquiry directly to the care home, or get help from our team if the process feels overwhelming.",
-              },
-            ].map((item, i) => (
-              <m.div key={i} className="text-center" variants={fadeUp} transition={{ duration: 0.6 }}>
-                <m.div
-                  className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary"
-                  whileHover={{ scale: 1.1 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
-                  {item.icon}
-                </m.div>
-                <h3 className="mt-4 font-heading text-xl font-bold">
-                  <WelshWord en={item.title_en}>{item.title}</WelshWord>
-                </h3>
-                <p className="mx-auto mt-2 max-w-[240px] text-[15px] leading-[1.65] text-muted-plum">{item.desc}</p>
-              </m.div>
-            ))}
-          </m.div>
         </div>
       </section>
 
-      {/* ── 4. FOUNDING STORY ── Linen bg */}
-      <section className="bg-linen py-16 sm:py-24 overflow-hidden">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6">
-          <div className="grid gap-10 items-center md:grid-cols-2">
-            <m.div
-              className="text-center md:text-left"
-              initial={{ opacity: 0, x: -40 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.7 }}
-            >
-              <div className="border-l-4 border-secondary pl-5 mb-6">
-                <p className="font-heading text-[18px] font-semibold text-primary sm:text-[22px] leading-snug">
-                  {locale === "cy"
-                    ? "Roedd dod o hyd i ofal Cymraeg yn hunllef."
-                    : "Finding Welsh-language care was a nightmare."}
-                </p>
+      {/* ── 4. FOUNDING STORY ── */}
+      <section className="bg-warmgrey px-6 py-28 lg:px-16">
+        <div className="grid items-center gap-20 lg:grid-cols-2">
+          <div>
+            <div className="mb-4 font-mono text-[11px] uppercase tracking-[0.15em] text-ink-60">
+              003 / {cyLabel("Pam gofal.wales?", "Why gofal.wales?")}
+            </div>
+            <h2 className="font-display text-[72px] font-normal leading-[0.98] tracking-[-0.03em] text-ink">
+              {cyLabel("Roedd dod o hyd i ofal Cymraeg yn ", "Finding Welsh-language care was ")}
+              <span className="italic text-coral">{cyLabel("hunllef.", "a nightmare.")}</span>
+            </h2>
+            <p className="mt-7 max-w-[520px] text-[19px] leading-[1.7] text-ink">
+              {t("story.paragraph1")}
+            </p>
+            <p className="mt-4 max-w-[520px] text-[19px] leading-[1.7] text-ink">
+              {t("story.paragraph2")}
+            </p>
+            <div className="mt-8 flex items-center gap-4 border-t border-hairline pt-5">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-ink font-display text-[22px] text-white">
+                {t("story.author").charAt(0)}
               </div>
-              <h2 className="font-heading text-3xl font-bold sm:text-4xl">
-                <WelshWord en="Why gofal.wales?">{t("story.title")}</WelshWord>
-              </h2>
-              <p className="mt-6 max-w-[560px] text-dusk leading-[1.8]" style={{ fontSize: "19px" }}>
-                {t("story.paragraph1")}
-              </p>
-              <p className="mt-4 max-w-[560px] text-dusk leading-[1.8] mb-6" style={{ fontSize: "19px" }}>
-                {t("story.paragraph2")}
-              </p>
-              <div className="mt-4">
-                <p className="font-heading font-bold text-primary">{t("story.author")}</p>
-                <p className="text-[14px] text-muted-plum">Ateb AI, Llanelli, Cymru</p>
+              <div>
+                <div className="font-display text-[20px] tracking-[-0.01em] text-ink">
+                  {t("story.author")}, Ateb AI
+                </div>
+                <div className="mt-0.5 font-mono text-[11px] uppercase tracking-[0.1em] text-ink-60">
+                  Llanelli, Cymru
+                </div>
               </div>
-            </m.div>
-            <m.div
-              className="relative h-72 md:h-96 rounded-[24px] overflow-hidden"
-              initial={{ opacity: 0, x: 40 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.7, delay: 0.15 }}
-            >
-              <img
-                src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80&fm=webp&fit=crop"
-                alt="Cymuned Gymreig / Welsh community"
-                className="h-full w-full object-cover"
-                loading="lazy"
-              />
-            </m.div>
+            </div>
+          </div>
+
+          <div
+            className="relative aspect-[4/5] border border-hairline"
+            style={{
+              backgroundImage: "repeating-linear-gradient(135deg, #E8E3DA 0 14px, #DDD6CC 14px 15px)",
+            }}
+          >
+            <img
+              src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80&fm=webp&fit=crop"
+              alt={cyLabel("Cymuned Gymreig", "Welsh community")}
+              className="h-full w-full object-cover"
+              loading="lazy"
+            />
+            <div className="absolute left-4 top-4 font-mono text-[10px] uppercase tracking-[0.12em] text-white mix-blend-difference">
+              [ {cyLabel("llun · cymuned Gymreig", "photograph · Welsh community")} ]
+            </div>
+            <div className="absolute bottom-4 right-4 font-mono text-[10px] uppercase tracking-[0.12em] text-white mix-blend-difference">
+              PLATE 01
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── 5. TRUST BANNER ── Honey stripe */}
-      <div className="bg-accent py-3">
-        <p className="text-center font-heading text-sm font-semibold text-dusk sm:text-base">
-          <span className="mr-2 text-secondary">✓</span>
-          {locale === "cy"
-            ? "Mae ein gwasanaeth am ddim i deuluoedd — bob amser"
-            : "Our service is free for families — always"}
-        </p>
-      </div>
-
-      {/* ── 6. BROWSE BY COUNTY ── Map + pill links */}
-      <section className="bg-white py-16 sm:py-24">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6">
-          <m.h2 className="text-center font-heading text-3xl font-bold sm:text-4xl" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} transition={{ duration: 0.6 }}>
-            {locale === "cy"
-              ? <WelshWord en="Browse by county">Porwch yn ôl sir</WelshWord>
-              : "Browse by county"}
-          </m.h2>
-          <m.p className="mt-3 text-center text-muted-plum" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} transition={{ duration: 0.5, delay: 0.2 }}>
-            {locale === "cy"
-              ? "Dewiswch sir i weld cartrefi gofal yn yr ardal"
-              : "Select a county to see care homes in the area"}
-          </m.p>
-          {/* Interactive map — large, desktop only */}
-          <m.div
-            className="mt-10 hidden sm:block mx-auto max-w-2xl"
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.3 }}
+      {/* ── 5. COUNTY RAIL ── */}
+      <section className="bg-ivory px-6 py-28 lg:px-16">
+        <div className="mb-12 flex items-baseline justify-between">
+          <div>
+            <div className="mb-3 font-mono text-[11px] uppercase tracking-[0.15em] text-ink-60">
+              004 / {cyLabel("Porwch yn ôl sir", "Browse by county")}
+            </div>
+            <h2 className="font-display text-[72px] font-normal leading-[0.95] tracking-[-0.03em] text-ink">
+              {cyLabel("Pob 22 sir.", "All 22 counties.")}
+            </h2>
+          </div>
+          <Link
+            href="/cartrefi-gofal"
+            className="border-b-[1.5px] border-ink pb-1 font-mono text-[12px] font-bold uppercase tracking-[0.12em] text-ink"
           >
-            <WalesMap countyCounts={countyCounts} />
-          </m.div>
-          {/* County pill links — always visible, primary nav on mobile */}
-          <m.div className="mt-10 flex flex-wrap justify-center gap-3" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerChildren}>
-            {counties.map((county) => (
-              <m.div key={county.slug} variants={fadeUp} transition={{ duration: 0.3 }}>
-                <Link
-                  href={`/cartrefi-gofal/${county.slug}`}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-blush-grey bg-white px-4 py-2 text-sm font-body font-semibold text-dusk transition-colors hover:bg-primary hover:text-white hover:border-primary"
-                >
-                  {locale === "cy" ? county.name_cy : county.name_en}
-                  {countyCounts[county.slug] > 0 && (
-                    <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold text-primary">
-                      {countyCounts[county.slug]}
-                    </span>
-                  )}
-                </Link>
-              </m.div>
-            ))}
-          </m.div>
+            {cyLabel("Gweld pob cartref", "See every home")} →
+          </Link>
+        </div>
+
+        <div className="grid border-t border-ink sm:grid-cols-2 lg:grid-cols-4">
+          {counties.map((c, i) => {
+            const count = countyCounts[c.slug];
+            const borderR = (i + 1) % 4 !== 0;
+            return (
+              <Link
+                key={c.slug}
+                href={`/cartrefi-gofal/${c.slug}`}
+                className={`flex flex-col gap-2 border-b border-hairline px-5 py-6 transition-colors hover:bg-warmgrey ${
+                  borderR ? "lg:border-r lg:border-hairline" : ""
+                }`}
+              >
+                <div className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-60">
+                  {String(i + 1).padStart(2, "0")}
+                </div>
+                <div className="font-display text-[26px] leading-[1.05] tracking-[-0.02em] text-ink">
+                  {c.name_cy}
+                </div>
+                <div className="font-body text-[12px] text-ink-60">{c.name_en}</div>
+                <div className="mt-auto flex items-baseline justify-between pt-3">
+                  <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-ink-60">
+                    {count ? `${count} ${cyLabel("cartrefi", "homes")}` : "—"}
+                  </span>
+                  <span>→</span>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
-      {/* ── 7. CTA ── Heather bg */}
-      <section className="bg-primary py-16 text-center text-white sm:py-20">
-        <m.div className="mx-auto max-w-[640px] px-4 sm:px-6" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerChildren}>
-          <m.h2 className="font-heading text-[26px] font-bold text-white sm:text-[32px]" variants={fadeUp} transition={{ duration: 0.6 }}>
-            {locale === "cy" ? "Barod i ddechrau chwilio?" : "Ready to start searching?"}
-          </m.h2>
-          <m.p className="mt-4 font-body text-[18px] text-white/[0.85]" variants={fadeUp} transition={{ duration: 0.6 }}>
-            {locale === "cy"
-              ? "Mae pob cartref gofal yng Nghymru ar gofal.wales — am ddim i deuluoedd bob amser. Dewch o hyd i gartref sy'n siarad Cymraeg yn eich ardal chi."
-              : "Every care home in Wales is on gofal.wales — always free for families. Find a home that speaks Welsh in your area."}
-          </m.p>
-          <m.div variants={fadeUp} transition={{ duration: 0.6 }} className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <m.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 400 }}>
-              <Link
-                href="/cartrefi-gofal"
-                className="inline-block rounded-full bg-secondary px-8 py-4 font-body text-[16px] font-bold text-white transition-colors hover:bg-secondary-hover"
-              >
-                {locale === "cy" ? "Dechrau chwilio nawr" : "Start searching now"}
-              </Link>
-            </m.div>
-            <Link
-              href="/cymorth"
-              className="inline-flex items-center gap-2 rounded-full border-2 border-white/50 px-6 py-3 font-body font-semibold text-white transition-colors hover:bg-white hover:text-primary"
-            >
-              {locale === "cy" ? "Cael cymorth" : "Get help"} &rarr;
-            </Link>
-          </m.div>
-        </m.div>
+      {/* ── 6. BIG CTA ── */}
+      <section className="border-t border-hairline bg-ivory px-6 py-28 text-center lg:px-16">
+        <div className="mb-5 font-mono text-[11px] uppercase tracking-[0.15em] text-ink-60">
+          005 / {cyLabel("Barod?", "Ready?")}
+        </div>
+        <h2 className="font-display text-[clamp(72px,10vw,128px)] font-normal leading-[0.92] tracking-[-0.04em] text-ink">
+          {cyLabel("Dewch o hyd i'r cartref iawn.", "Find the right home.")}
+          <br />
+          <span className="italic text-heather">{cyLabel("Yn Gymraeg.", "Yn Gymraeg.")}</span>
+        </h2>
+        <div className="mt-14 flex flex-wrap justify-center gap-4">
+          <Link
+            href="/cartrefi-gofal"
+            className="inline-flex items-center gap-3 bg-ink px-8 py-5 font-mono text-[13px] font-bold uppercase tracking-[0.12em] text-white"
+          >
+            {cyLabel("Dechrau chwilio", "Start searching")} <span>↗</span>
+          </Link>
+          <Link
+            href="/cymorth"
+            className="inline-flex items-center gap-3 border-[1.5px] border-ink px-8 py-5 font-mono text-[13px] font-bold uppercase tracking-[0.12em] text-ink"
+          >
+            {cyLabel("Siarad â'n tîm", "Talk to our team")}
+          </Link>
+        </div>
       </section>
     </>
   );
