@@ -168,14 +168,18 @@ export function WalesMap({ countyCounts = {}, variant = "default" }: WalesMapPro
                 y={county.center[1]}
                 textAnchor="middle"
                 dominantBaseline="central"
-                className={`pointer-events-none select-none ${
+                className={`pointer-events-none select-none transition-opacity duration-200 ${
                   variant === "default" ? "hidden sm:block" : "hidden md:block"
                 }`}
                 fill={isHovered ? s.labelHover : s.labelDefault}
                 fontSize={isHovered ? 11 : 9}
                 fontWeight={isHovered ? 700 : 400}
                 fontFamily={s.labelFontFamily}
-                opacity={isHovered ? 1 : s.labelOpacityDefault}
+                /* Editorial: labels are off by default — the top-left
+                   readout names the hovered county, so the over-shape label
+                   only appears on hover. Other variants keep their soft
+                   always-on labels. */
+                opacity={isHovered ? 1 : isEditorial ? 0 : s.labelOpacityDefault}
                 style={{
                   letterSpacing: s.labelLetterSpacing,
                   textTransform: s.labelTransform,
